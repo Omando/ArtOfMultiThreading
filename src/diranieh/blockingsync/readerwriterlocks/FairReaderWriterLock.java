@@ -1,10 +1,10 @@
 package diranieh.blockingsync.readerwriterlocks;
 
-import jdk.jshell.spi.ExecutionControl;
-
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.*;
-
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * A simple implementation of {@link ReadWriteLock} supporting similar
@@ -14,8 +14,15 @@ import java.util.concurrent.locks.*;
  * ordering for lock access. This class does not support upgrading
  * a read lock to a write lock, or downgrading a write lock to a
  * read lock
+ *
+ * This class ensures that once a writer thread calls gerWriterLock().lock(),
+ * irrespective of whether gerWriterLock().lock() acquires the lock or blocks,
+ * then no more readers will be able to acquire a read lock until the writer
+ * has acquired and released the write lock. Eventually, the readers holding
+ * a lock will drain out without letting any more readers in, and the writer
+ * thread will acquire the write lock
  */
-public class SimpleReaderWriterLock implements ReaderWriterLock {
+public class FairReaderWriterLock implements ReaderWriterLock {
     private int readerCount = 0;
     private int writerCount = 0;
     private final Lock lock = new ReentrantLock();
@@ -50,7 +57,7 @@ public class SimpleReaderWriterLock implements ReaderWriterLock {
             lock.lock();
             try {
                 // Release lock and block while a writer is active
-                // InterruptedException is rethrown to caller
+                // InterruptedException, if any, is rethrown to caller
                 while (hasWriter())
                     noWriter.await();
 
@@ -98,13 +105,6 @@ public class SimpleReaderWriterLock implements ReaderWriterLock {
         public void lock() {
             lock.lock();
             try {
-                // Release lock and block while readers are active. Catch any interrupt and loop again
-                while (hasReaders()) {
-                    try {
-                        noReaders.await();
-                    } catch (InterruptedException ignored) { /* Catch the interrupt and wait again */ }
-                }
-
                 // Release lock and block while a writer is active. Catch any interrupt and loop again
                 while (hasWriter()) {
                     try {
@@ -114,6 +114,17 @@ public class SimpleReaderWriterLock implements ReaderWriterLock {
 
                 // A writer is active
                 ++writerCount;
+
+                // Release lock and block while readers are active. Because writerCounter was incremented above
+                // any readers attempting to acquire the lock will now block waiting for the the writer lock
+                // to unlock. In the meantime, this thread will block if there are any active readers until
+                // they unlock. Catch any interrupt and loop again
+                while (hasReaders()) {
+                    try {
+                        noReaders.await();
+                    } catch (InterruptedException ignored) { /* Catch the interrupt and wait again */ }
+                }
+
             } finally {
                 lock.unlock();
             }
@@ -123,18 +134,21 @@ public class SimpleReaderWriterLock implements ReaderWriterLock {
         public void lockInterruptibly() throws InterruptedException {
             lock.lock();
             try {
-                // Release lock and block while readers are active
-                // InterruptedException is rethrown to caller
-                while (hasReaders())
-                    noReaders.await();
-
                 // Release lock and block while a writer is active
-                // InterruptedException is rethrown to caller
+                // InterruptedException, if any, is rethrown to caller
                 while (hasWriter())
                     noWriter.await();
 
-                // A writer is active
+                // A writer is active.
                 ++writerCount;
+
+                // Release lock and block while readers are active. Because writerCounter was incremented above
+                // any readers attempting to acquire the lock will now block waiting for the the writer lock
+                // to unlock. In the meantime, this thread will block if there are any active readers until
+                // they unlock.InterruptedException, if any, is rethrown to caller
+                while (hasReaders())
+                    noReaders.await();
+
             } finally {
                 lock.unlock();
             }
