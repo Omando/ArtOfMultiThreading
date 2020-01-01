@@ -8,14 +8,13 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.locks.Lock;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 
-public class FairReaderWriterLockTest {
+class SimpleReaderWriterLockTest {
     /*  Invariants and post conditions */
     @Test
     public void has_no_readers_or_writers_on_construction() {
         // Arrange and act
-        FairReaderWriterLock readerWriterLock = new FairReaderWriterLock();
+        SimpleReaderWriterLock readerWriterLock = new SimpleReaderWriterLock();
 
         // Assert
         assertFalse(readerWriterLock.hasReaders());
@@ -25,7 +24,7 @@ public class FairReaderWriterLockTest {
     @Test
     public void should_have_reader_and_no_writer() {
         // Arrange
-        FairReaderWriterLock readerWriterLock = new FairReaderWriterLock();
+        SimpleReaderWriterLock readerWriterLock = new SimpleReaderWriterLock();
 
         // Act
         Lock readerLock = readerWriterLock.getReaderLock();
@@ -42,7 +41,7 @@ public class FairReaderWriterLockTest {
     @Test
     public void should_have_writer_and_no_reader() {
         // Arrange
-        FairReaderWriterLock readerWriterLock = new FairReaderWriterLock();
+        SimpleReaderWriterLock readerWriterLock = new SimpleReaderWriterLock();
 
         // Act
         Lock writerLock = readerWriterLock.gerWriterLock();
@@ -60,7 +59,7 @@ public class FairReaderWriterLockTest {
     @Test
     public void should_block_writer_when_readers_active() throws InterruptedException {
         /* Arrange */
-        FairReaderWriterLock readerWriteLock = new FairReaderWriterLock();
+        SimpleReaderWriterLock readerWriteLock = new SimpleReaderWriterLock();
         Lock readerLock = readerWriteLock.getReaderLock();
         readerLock.lock();
 
@@ -94,7 +93,7 @@ public class FairReaderWriterLockTest {
     @Test
     public void should_block_reader_and_writer_when_writer_active() throws InterruptedException {
         /* Arrange */
-        FairReaderWriterLock readerWriteLock = new FairReaderWriterLock();
+        SimpleReaderWriterLock readerWriteLock = new SimpleReaderWriterLock();
         Lock writerLock = readerWriteLock.gerWriterLock();
         writerLock.lock();
 
@@ -143,7 +142,7 @@ public class FairReaderWriterLockTest {
     @Test
     public void should_not_block_reader_when_another_reader_active() throws InterruptedException {
         // Arrange
-        FairReaderWriterLock readerWriteLock = new FairReaderWriterLock();
+        SimpleReaderWriterLock readerWriteLock = new SimpleReaderWriterLock();
         Lock readerLock1 = readerWriteLock.getReaderLock();
         readerLock1.lock();
 
@@ -174,12 +173,12 @@ public class FairReaderWriterLockTest {
     public void should_synchronize_multiple_readers_multiple_writers() {
 
         // Arrange
-        final int readerThreads = 10;
-        final int writerThreads = 10;
+        final int readerThreads = 100;
+        final int writerThreads = 100;
         final int partyCount = readerThreads + writerThreads + 1;      // +1 for main thread
         CyclicBarrier barrier = new CyclicBarrier(partyCount);
         ExecutorService pool = Executors.newCachedThreadPool();
-        FairReaderWriterLock readerWriterLock = new FairReaderWriterLock();
+        SimpleReaderWriterLock readerWriterLock = new SimpleReaderWriterLock();
 
         for (int j = 0; j < writerThreads; j++) {
             Thread thread = new Thread(() -> {
@@ -254,5 +253,4 @@ public class FairReaderWriterLockTest {
             result += Math.sin(i * 3.14159 / 180);
         }
     }
-
 }

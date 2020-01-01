@@ -1,18 +1,21 @@
 package diranieh.blockingsync.readerwriterlocks;
 
 import org.junit.jupiter.api.Test;
+
 import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.locks.Lock;
+
 import static org.junit.jupiter.api.Assertions.*;
 
-class SimpleReaderWriterLockTest {
+//class FairReaderWriterLockTest {  }
+class FairReaderWriterLockTest {
     /*  Invariants and post conditions */
     @Test
     public void has_no_readers_or_writers_on_construction() {
         // Arrange and act
-        SimpleReaderWriterLock readerWriterLock = new SimpleReaderWriterLock();
+        FairReaderWriterLock readerWriterLock = new FairReaderWriterLock();
 
         // Assert
         assertFalse(readerWriterLock.hasReaders());
@@ -22,7 +25,7 @@ class SimpleReaderWriterLockTest {
     @Test
     public void should_have_reader_and_no_writer() {
         // Arrange
-        SimpleReaderWriterLock readerWriterLock = new SimpleReaderWriterLock();
+        FairReaderWriterLock readerWriterLock = new FairReaderWriterLock();
 
         // Act
         Lock readerLock = readerWriterLock.getReaderLock();
@@ -39,7 +42,7 @@ class SimpleReaderWriterLockTest {
     @Test
     public void should_have_writer_and_no_reader() {
         // Arrange
-        SimpleReaderWriterLock readerWriterLock = new SimpleReaderWriterLock();
+        FairReaderWriterLock readerWriterLock = new FairReaderWriterLock();
 
         // Act
         Lock writerLock = readerWriterLock.gerWriterLock();
@@ -57,7 +60,7 @@ class SimpleReaderWriterLockTest {
     @Test
     public void should_block_writer_when_readers_active() throws InterruptedException {
         /* Arrange */
-        SimpleReaderWriterLock readerWriteLock = new SimpleReaderWriterLock();
+        FairReaderWriterLock readerWriteLock = new FairReaderWriterLock();
         Lock readerLock = readerWriteLock.getReaderLock();
         readerLock.lock();
 
@@ -91,7 +94,7 @@ class SimpleReaderWriterLockTest {
     @Test
     public void should_block_reader_and_writer_when_writer_active() throws InterruptedException {
         /* Arrange */
-        SimpleReaderWriterLock readerWriteLock = new SimpleReaderWriterLock();
+        FairReaderWriterLock readerWriteLock = new FairReaderWriterLock();
         Lock writerLock = readerWriteLock.gerWriterLock();
         writerLock.lock();
 
@@ -140,7 +143,7 @@ class SimpleReaderWriterLockTest {
     @Test
     public void should_not_block_reader_when_another_reader_active() throws InterruptedException {
         // Arrange
-        SimpleReaderWriterLock readerWriteLock = new SimpleReaderWriterLock();
+        FairReaderWriterLock readerWriteLock = new FairReaderWriterLock();
         Lock readerLock1 = readerWriteLock.getReaderLock();
         readerLock1.lock();
 
@@ -171,12 +174,12 @@ class SimpleReaderWriterLockTest {
     public void should_synchronize_multiple_readers_multiple_writers() {
 
         // Arrange
-        final int readerThreads = 100;
-        final int writerThreads = 100;
+        final int readerThreads = 10;
+        final int writerThreads = 10;
         final int partyCount = readerThreads + writerThreads + 1;      // +1 for main thread
         CyclicBarrier barrier = new CyclicBarrier(partyCount);
         ExecutorService pool = Executors.newCachedThreadPool();
-        SimpleReaderWriterLock readerWriterLock = new SimpleReaderWriterLock();
+        FairReaderWriterLock readerWriterLock = new FairReaderWriterLock();
 
         for (int j = 0; j < writerThreads; j++) {
             Thread thread = new Thread(() -> {
@@ -251,4 +254,5 @@ class SimpleReaderWriterLockTest {
             result += Math.sin(i * 3.14159 / 180);
         }
     }
+
 }

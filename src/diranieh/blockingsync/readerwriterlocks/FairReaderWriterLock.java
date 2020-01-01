@@ -32,7 +32,6 @@ public class FairReaderWriterLock implements ReaderWriterLock {
     private final Condition noReaders = lock.newCondition();
 
     private class ReaderLock implements Lock {
-
         @Override
         public void lock() {
             lock.lock();
@@ -100,7 +99,6 @@ public class FairReaderWriterLock implements ReaderWriterLock {
     }
 
     private class WriterLock implements Lock {
-
         @Override
         public void lock() {
             lock.lock();
@@ -196,10 +194,12 @@ public class FairReaderWriterLock implements ReaderWriterLock {
         return writerLock;
     }
 
+    // condition queue predicate
     boolean hasReaders() {
         return readerCount > 0;
     }
 
+    // condition queue predicate
     boolean hasWriter() {
         return writerCount == 1;
     }
