@@ -24,7 +24,7 @@ public class SimpleReentrantLock implements Lock {
             while (!isOwner()) {
                 try {
                     lock.wait();
-                } catch (InterruptedException e) { /* Ignore exception and retry to acquire lock*/ }
+                } catch (InterruptedException ignored) { /* Ignore exception and retry to acquire lock*/ }
             }
 
             ownerId = threadId;
