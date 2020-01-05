@@ -1,9 +1,10 @@
 package diranieh.blockingsync.readerwriterlocks;
 
-import jdk.jshell.spi.ExecutionControl;
-
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.*;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantLock;
 
 
 /**
@@ -180,6 +181,7 @@ public class SimpleReaderWriterLock implements ReaderWriterLock {
         return writerLock;
     }
 
+    /* Package-private visibility for testing*/
     // condition queue predicate
     boolean hasReaders() {
         return readerCount > 0;

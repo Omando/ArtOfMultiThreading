@@ -81,7 +81,7 @@ public class SimpleReentrantLock implements Lock {
         throw new UnsupportedOperationException("Not implemented yet");
     }
 
-    /* Used for testing */
+    /* Package-private visibility for testing*/
     long getOwnerId() {
         return ownerId;
     }
@@ -90,7 +90,7 @@ public class SimpleReentrantLock implements Lock {
         return holdCount;
     }
 
-    /* Helpers */
+    /* Implementation details */
     private boolean isOwner() {     // condition queue predicate
         return ownerId == -1 || ownerId == Thread.currentThread().getId();
     }

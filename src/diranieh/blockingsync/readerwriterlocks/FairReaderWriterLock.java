@@ -194,6 +194,7 @@ public class FairReaderWriterLock implements ReaderWriterLock {
         return writerLock;
     }
 
+    /* Package-private visibility for testing*/
     // condition queue predicate
     boolean hasReaders() {
         return readerCount > 0;
