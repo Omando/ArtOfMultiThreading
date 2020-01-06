@@ -127,8 +127,7 @@ public class SimpleLinkedListSet<T> implements Set<T> {
         return searchResult.current.hashCode == hashCode;
     }
 
-    /* Package-private visibility for testing*/
-    boolean isEmpty() {
+    public boolean isEmpty() {
         return head == null && tail == null;
     }
 
