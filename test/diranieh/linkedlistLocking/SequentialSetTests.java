@@ -43,7 +43,6 @@ public interface SequentialSetTests {
         assertFalse(simpleSet.contains(item4));
     }
 
-
     @Test
     default void should_remove_exiting() {
         // Arrange

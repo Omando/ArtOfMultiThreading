@@ -1,8 +1,17 @@
 package diranieh.linkedlistLocking;
 
-/** Linked list implementation of a set
- Nodes are sorted in hashcode order, providing an efficient way to detect when an item
- is absent.
+/**
+ * A linked list implementation of an ordered set of keys. The keys are assumed to
+ * have minimum and maximum values.
+ *
+ *  Nodes are sorted in hashcode order, providing an efficient way to detect when an item
+ *  is absent.
+ *
+ *  This class does not use a sentinel for the head. Compare the code in this class
+ *  to SimpleLinkedListSet2 which uses a sentinel for the head. The code in
+ *  SimpleLinkedListSet2<E> is much more compact than the code in this class
+ *
+ *  This class is not used any further
  */
 public class SimpleLinkedListSet<T> implements Set<T> {
     private static class Node<T> {
@@ -31,7 +40,6 @@ public class SimpleLinkedListSet<T> implements Set<T> {
         }
     }
 
-    // Sentinels
     private Node<T> head;
     private Node<T> tail;
 

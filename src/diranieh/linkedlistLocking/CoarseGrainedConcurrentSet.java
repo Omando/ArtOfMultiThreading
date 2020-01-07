@@ -10,7 +10,7 @@ package diranieh.linkedlistLocking;
  *  due to serialization and context switches.
  */
 public class CoarseGrainedConcurrentSet<T> implements Set<T> {
-    private final SimpleLinkedListSet<T> implementation = new SimpleLinkedListSet<>();
+    private final SimplerLinkedListSet<T> implementation = new SimplerLinkedListSet<>();
 
     @Override
     public synchronized boolean add(T item) {
