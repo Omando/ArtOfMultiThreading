@@ -1,8 +1,8 @@
 package diranieh.linkedlistLocking;
 
-public interface Set<T> {
-    boolean add(T item);
-    boolean remove(T item);
-    boolean contains(T item);
+public interface Set<E> {
+    boolean add(E item);
+    boolean remove(E item);
+    boolean contains(E item);
     boolean isEmpty();
 }

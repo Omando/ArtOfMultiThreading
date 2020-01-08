@@ -13,35 +13,36 @@ package diranieh.linkedlistLocking;
  *
  *  This class is not used any further
  */
-public class SimpleLinkedListSet<T> implements Set<T> {
-    private static class Node<T> {
-        T item;
-        int hashCode;
-        Node<T> next;
+public class SimpleLinkedListSet<E> implements Set<E> {
+    private static class Node<E> {
+        private final E item;
+        private final int hashCode;
+        private Node<E> next;
 
-        public Node(T item) {
+        public Node(E item) {
             this(item, null);
         }
-        public Node(T item, Node<T> next) {
+
+        public Node(E item, Node<E> next) {
             this.item = item;
             this.hashCode = item.hashCode();
             this.next = next;
         }
     }
 
-    // Holds the result of calling SimpleSet<T>.search
-    private static class SearchResult<T> {
-        Node<T> predecessor;
-        Node<T> current;
+    // Holds the result of calling SimpleSet<E>.search
+    private static class SearchResult<E> {
+        private final Node<E> predecessor;
+        private final Node<E> current;
 
-        public SearchResult(Node<T> predecessor, Node<T> current) {
+        public SearchResult(Node<E> predecessor, Node<E> current) {
             this.predecessor = predecessor;
             this.current = current;
         }
     }
 
-    private Node<T> head;
-    private Node<T> tail;
+    private Node<E> head;
+    private Node<E> tail;
 
     /* Adds an item to the set according to the sort order imposed by the key
     * Iterate the list comparing keys. If a match is found, the item is already present
@@ -49,8 +50,8 @@ public class SimpleLinkedListSet<T> implements Set<T> {
     * in the set. The item is added before the node with the higher key, and true is
     * returned*/
     @Override
-    public boolean add(T item) {
-        Node<T> newNode = new Node<>(item);
+    public boolean add(E item) {
+        Node<E> newNode = new Node<>(item);
 
         // new item becomes head and tail if set is empty
         if (isEmpty()) {
@@ -74,7 +75,7 @@ public class SimpleLinkedListSet<T> implements Set<T> {
         }
 
         //search for item  between head and tail
-        SearchResult<T> searchResult = search(newNode.hashCode);
+        SearchResult<E> searchResult = search(newNode.hashCode);
 
         // Return false if found between head and tail, otherwise insert between
         // predecessor and current nodes
@@ -88,7 +89,7 @@ public class SimpleLinkedListSet<T> implements Set<T> {
     }
 
     @Override
-    public boolean remove(T item) {
+    public boolean remove(E item) {
         // Nothing to do if list is empty, or item's hash code is outside the range
         // identified by the hash codes of head and tail
         int hashCode = item.hashCode();
@@ -97,7 +98,7 @@ public class SimpleLinkedListSet<T> implements Set<T> {
         }
 
         //search for item  between head and tail
-        SearchResult<T> searchResult = search(hashCode);
+        SearchResult<E> searchResult = search(hashCode);
 
         // Remove node if found, otherwise nothing to do and return false
         if (searchResult.current.hashCode == hashCode) {
@@ -125,13 +126,13 @@ public class SimpleLinkedListSet<T> implements Set<T> {
     }
 
     @Override
-    public boolean contains(T item) {
+    public boolean contains(E item) {
         int hashCode = item.hashCode();
         if (isEmpty() || hashCode < head.hashCode || hashCode > tail.hashCode) {
             return false;
         }
 
-        SearchResult<T> searchResult = search(hashCode);
+        SearchResult<E> searchResult = search(hashCode);
         return searchResult.current.hashCode == hashCode;
     }
 
@@ -140,15 +141,15 @@ public class SimpleLinkedListSet<T> implements Set<T> {
     }
 
     /* Implementation details*/
-    private SearchResult<T> search(int itemHashCode) {
+    private SearchResult<E> search(int itemHashCode) {
         // Check if item's hashcode is outside the range of head and tail
         if (itemHashCode < head.hashCode || itemHashCode > tail.hashCode) {
             return new SearchResult<>(null, null);
         }
 
         // Item's hash code is somewhere between head and tail
-        Node<T> current = head;
-        Node<T> predecessor = null;
+        Node<E> current = head;
+        Node<E> predecessor = null;
         while (current.hashCode < itemHashCode) {
             predecessor = current;
             current = current.next;

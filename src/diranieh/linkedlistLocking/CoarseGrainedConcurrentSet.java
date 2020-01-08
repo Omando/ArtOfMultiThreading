@@ -9,21 +9,21 @@ package diranieh.linkedlistLocking;
  *  perform. This is because threads will be delayed waiting for one another
  *  due to serialization and context switches.
  */
-public class CoarseGrainedConcurrentSet<T> implements Set<T> {
-    private final SimplerLinkedListSet<T> implementation = new SimplerLinkedListSet<>();
+public class CoarseGrainedConcurrentSet<E> implements Set<E> {
+    private final SimplerLinkedListSet<E> implementation = new SimplerLinkedListSet<>();
 
     @Override
-    public synchronized boolean add(T item) {
+    public synchronized boolean add(E item) {
         return implementation.add(item);
     }
 
     @Override
-    public synchronized boolean remove(T item) {
+    public synchronized boolean remove(E item) {
         return implementation.remove(item);
     }
 
     @Override
-    public synchronized boolean contains(T item) {
+    public synchronized boolean contains(E item) {
         return implementation.contains(item);
     }
 
