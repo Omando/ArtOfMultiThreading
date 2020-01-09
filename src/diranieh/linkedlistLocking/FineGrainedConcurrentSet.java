@@ -74,9 +74,9 @@ public class FineGrainedConcurrentSet<E> implements Set<E> {
             return false;
         }
         finally {
-            searchResult.predecessor.unlock();
             if (searchResult.current != null)
                 searchResult.current.unlock();
+            searchResult.predecessor.unlock();
         }
     }
 
@@ -99,9 +99,9 @@ public class FineGrainedConcurrentSet<E> implements Set<E> {
             return false;
         }
         finally {
-            searchResult.predecessor.unlock();
             if (searchResult.current != null)
                 searchResult.current.unlock();
+            searchResult.predecessor.unlock();
         }
     }
 
@@ -116,9 +116,9 @@ public class FineGrainedConcurrentSet<E> implements Set<E> {
             return searchResult.current != null &&
                     searchResult.current.hashCode == itemHashCode;
         } finally {
-            searchResult.predecessor.unlock();
             if (searchResult.current != null)
                 searchResult.current.unlock();
+            searchResult.predecessor.unlock();
         }
     }
 
@@ -128,21 +128,26 @@ public class FineGrainedConcurrentSet<E> implements Set<E> {
 
     /* Implementation details*/
     private SearchResult<E> search(int itemHashCode) {
-        // Start from the head
+        synchronized (this) {
+            // Hand-over-hand locking. Obtaining the lock on both nodes (sentinelHead and
+            // sentinelHead.next) must be done atomically, otherwise it possible for
+            // sentinelHead to be locked by one thread and sentinelHead.next be locked
+            // by another thread!
+            sentinelHead.lock();
+            if (sentinelHead.next != null)
+                sentinelHead.next.lock();
+        }
+
         Node<E> predecessor = sentinelHead;
         Node<E> current = sentinelHead.next;
 
-        // Hand-over-hand locking
-        predecessor.lock();
-        if (current != null)
-            current.lock();
-
-        // Search for item
+        // Search for the given item starting from the head
         while (current != null && current.hashCode < itemHashCode) {
             predecessor.unlock();
             predecessor = current;     // current already locked, no need to lock predecessor after assignment
             current = current.next;
-            current.lock();
+            if (current != null)
+                current.lock();
         }
 
         return new SearchResult<>(predecessor, current);

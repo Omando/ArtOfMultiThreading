@@ -7,7 +7,11 @@ class CoarseGrainedConcurrentSetTests implements SequentialSetTests, ConcurrentS
     }
 
     @Override
-    public Set<String> createConcurrentSet() {
-        return new CoarseGrainedConcurrentSet<>();
+    public Set<String> createAndPopulateSet(Iterable<String> items) {
+        CoarseGrainedConcurrentSet<String> set  = new CoarseGrainedConcurrentSet<>();
+        for (String item: items) {
+            set.add(item);
+        }
+        return set;
     }
 }

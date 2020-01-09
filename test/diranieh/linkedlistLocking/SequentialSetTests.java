@@ -5,13 +5,11 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public interface SequentialSetTests {
+public interface SequentialSetTests extends BaseSetTest {
     String item1 = "Abstract";
     String item2 = "Base";
     String item3 = "Class";
     String item4 = "Derived";
-
-    Set<String> createSet();
 
     @Test
     default void new_set_should_be_empty() {
@@ -33,7 +31,7 @@ public interface SequentialSetTests {
         boolean add3 = simpleSet.add(item3);
 
         // Assert
-        assertTrue(!simpleSet.isEmpty());
+        assertFalse(simpleSet.isEmpty());
         assertTrue(simpleSet.contains(item1));
         assertTrue(simpleSet.contains(item2));
         assertTrue(simpleSet.contains(item3));
