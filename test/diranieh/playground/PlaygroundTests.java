@@ -9,18 +9,18 @@ public class PlaygroundTests {
 
     // Test only succeeds when stop is declared volatile
     @RepeatedTest(10)
-    public void test() throws InterruptedException {
+    void succeeds_when_flag_is_volatile() throws InterruptedException {
         // Start a thread that monitor stop variable
         stop = false;
 
         Thread thread = new Thread(() -> {
+            double value = 0;
             while (!stop) {
-                // Do some work
-                double value;
+                // Do some dummy work
                 for (int i = 0; i < 100; ++i)
-                    value = Math.sin(i * Math.PI / 180);
+                    value += Math.sin(i * Math.PI / 180);
             }
-            System.out.println("Thread detected stop signal");
+            System.out.println(String.format("Thread detected stop signal. Final value: {%.2f}", value));
         });
         thread.start();
 
@@ -35,5 +35,4 @@ public class PlaygroundTests {
         thread.join(1000);
         assertFalse(thread.isAlive());
     }
-
 }
