@@ -2,6 +2,20 @@ package diranieh.linkedlistLocking;
 
 import java.util.concurrent.locks.ReentrantLock;
 
+/**
+ * A concurrent linked list implementation of a set with fine-grained synchronization
+ *
+ * Concurrency is improved by locking individual nodes rather than locking the entire
+ * linked list. This fine-grained locking permits multiple concurrent threads to traverse
+ * the list all together in a pipelined fashion.
+ *
+ * Each node has its Lock object, with lock and unlock methods.
+ *
+ * Thread  acquire locks on nodes in a hand-over-hand order: except for the initial sentinel
+ * node, a thread acquires the lock for a node only when holding the lock for its predecessor.
+ *
+ * @param <E> the type of elements in this list
+ */
 public class FineGrainedConcurrentSet<E> implements Set<E> {
     private static class Node<E> {
         private final E item;
