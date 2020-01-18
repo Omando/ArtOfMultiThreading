@@ -70,8 +70,8 @@ public class OptimisticConcurrentSet<E> implements Set<E> {
     // Sentinels: never added, removed, searched or changed
     private final Node<E> sentinelHead;     // sentinelHead.next is head
 
-    public OptimisticConcurrentSet(Node<E> sentinelHead) {
-        this.sentinelHead = sentinelHead;
+    public OptimisticConcurrentSet() {
+        this.sentinelHead = new Node<>(null, Integer.MIN_VALUE);
     }
 
     @Override
@@ -151,7 +151,8 @@ public class OptimisticConcurrentSet<E> implements Set<E> {
                 if (isValidated(searchResult)) {
 
                     // We have valid nodes. Check current is what we're after
-                    return searchResult.current != null && searchResult.current.hashCode == itemHashCode;
+                    boolean isFound = searchResult.current != null && searchResult.current.hashCode == itemHashCode;
+                    return isFound;
                 }
             } finally {
                 searchResult.unlock();
@@ -161,9 +162,13 @@ public class OptimisticConcurrentSet<E> implements Set<E> {
 
     @Override
     public boolean isEmpty() {
-        return false;
+        try {
+            sentinelHead.lock();
+            return  sentinelHead.next == null;
+        } finally {
+            sentinelHead.unlock();
+        }
     }
-
 
     // searchResult is validated if 1) predecessor is reachable from head,
     // and 2) predecessor points to current
@@ -171,15 +176,16 @@ public class OptimisticConcurrentSet<E> implements Set<E> {
     //  1 -> 2 -> 3 -> X -> 5
     //  1 -> 2 -> 3 -> X
     private boolean isValidated(SearchResult<E> searchResult) {
-        // Start from head
-        Node<E> node = sentinelHead.next;
+        // Validated if set is empty
+        if (sentinelHead.next == null) return true;
 
         // Walk down the list from head until we reach a bigger item or the end of the list
+        Node<E> node = sentinelHead;
         while (node != null &&  node.hashCode < searchResult.predecessor.hashCode) {
              node = node.next;
         }
 
-        // Not validated if list is empty, reached end of list, or item not found
+        // Not validated if reached end of list or item was not found
         if (node == null || node.hashCode > searchResult.predecessor.hashCode)
             return false;
 
