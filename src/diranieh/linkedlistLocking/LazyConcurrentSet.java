@@ -110,7 +110,7 @@ public class LazyConcurrentSet<E> implements Set<E> {
                     // We have valid nodes. If item was found, remove the item pointed to by
                     // predecessor (i.e., current), else nothing to do
                     if (searchResult.current != null && searchResult.current.hashCode == itemHashCode) {
-                        searchResult.current.isMarked = true;
+                        searchResult.current.isMarked = true;   // NODE IS DELETED!!
                         searchResult.predecessor.next = searchResult.current.next;
                         return true;
                     }
@@ -122,22 +122,31 @@ public class LazyConcurrentSet<E> implements Set<E> {
         }
     }
 
+    // A wait-free implementation that returns true if the node of interest
+    // is present and unmarked
     @Override
     public boolean contains(E item) {
-        return false;
+        int itemHashCode = item.hashCode();
+        Node<E> current = sentinelHead.next;
+        while (current != null &&  itemHashCode > current.hashCode)
+            current = current.next;
+
+        return  current != null &&      // linked list is not empty or have not reached the end
+                !current.isMarked &&    // current node is not deleted
+                current.hashCode == itemHashCode;   // current node is equal to item of interest
     }
 
     @Override
     public boolean isEmpty() {
-        return false;
+        return sentinelHead.next == null;
     }
 
     // predecessor and current nodes are validated if both are NOT marked,
     // and predecessor points to current
     private boolean isValidated(Node<E> predecessor, Node<E> current) {
-        return !predecessor.isMarked &&         // is predecessor reachable?
-                !current.isMarked &&            // is current reachable?
-                predecessor.next == current;    // does predecessor point to current?
+        return !predecessor.isMarked &&                     // is predecessor not deleted?
+                (current == null || !current.isMarked) &&   // is current not deleted?
+                predecessor.next == current;                // does predecessor point to current?
     }
 
     private SearchResult<E> search(int itemHashCode) {
