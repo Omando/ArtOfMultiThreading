@@ -9,7 +9,9 @@ public class NonBlockingConcurrentSet<E> implements Set<E> {
         private AtomicMarkableReference<Node<E>> next;
 
         public Node(E item, int hashCode) {
-            this(item, hashCode, null);
+            // Unless previous implementations where null was passed for next, we
+            // pass an AtomicMarkableReference<E> initialized with null and false
+            this(item, hashCode, new AtomicMarkableReference<>(null, false));
         }
 
         public Node(E item, int hashCode, AtomicMarkableReference<Node<E>> next) {
@@ -35,6 +37,10 @@ public class NonBlockingConcurrentSet<E> implements Set<E> {
 
     public NonBlockingConcurrentSet() {
         this.sentinelHead = new Node<>(null, Integer.MIN_VALUE);
+
+        // Adding tail will simplify code below wihtout having to check that head is null
+        Node<E> tail = new Node<>(null, Integer.MAX_VALUE);
+        while (!this.sentinelHead.next.compareAndSet(null, tail, false, false));
     }
 
     @Override
@@ -42,6 +48,18 @@ public class NonBlockingConcurrentSet<E> implements Set<E> {
         int hashCode = item.hashCode();
         while (true) {
             SearchResult<E> find = search(sentinelHead, item.hashCode());
+
+            // Nothing to do if the item is already presnet
+            if (find.current.hashCode == hashCode)
+                return false;
+
+            // Item not found. Attempt to add it between predecessor and current
+            Node<E> newNode = new Node<>(item, hashCode);
+            newNode.next = new AtomicMarkableReference<>(find.current, false);
+            if (find.predecessor.next.compareAndSet(find.current, newNode, false, false))
+                return true;
+
+            // Could not add node, so start again searching for item starting from the head
         }
     }
 
