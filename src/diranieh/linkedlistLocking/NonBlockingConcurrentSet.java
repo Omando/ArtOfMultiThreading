@@ -9,7 +9,7 @@ public class NonBlockingConcurrentSet<E> implements Set<E> {
         private AtomicMarkableReference<Node<E>> next;
 
         public Node(E item, int hashCode) {
-            // Unless previous implementations where null was passed for next, we
+            // In previous implementations we passed null for next. Here we
             // pass an AtomicMarkableReference<E> initialized with null and false
             this(item, hashCode, new AtomicMarkableReference<>(null, false));
         }
@@ -21,7 +21,7 @@ public class NonBlockingConcurrentSet<E> implements Set<E> {
         }
     }
 
-    // SearchResult<E> class factors out functionality common to add and remove methods
+    // A container for predecessor and current nodes
     private static class SearchResult<E> {
         private final Node<E> predecessor;
         private final Node<E> current;
@@ -65,7 +65,27 @@ public class NonBlockingConcurrentSet<E> implements Set<E> {
 
     @Override
     public boolean remove(E item) {
-        return false;
+        int hashCode = item.hashCode();
+        while (true) {
+            SearchResult<E> find = search(sentinelHead, item.hashCode());
+            Node<E> predecessor = find.predecessor, current = find.current;
+
+            // Nothing to do if the item is not present
+            if (current.hashCode != hashCode)
+                return false;
+
+            // Item found. Attempt to delete it by pointing predecessor.next to
+            // current.next
+            Node<E> successor = current.next.getReference();
+
+            // marking successor as deleted!!??? DO NOT UNDERSTAND THIE LINE
+            if (!current.next.attemptMark(successor, true))
+                continue;
+
+            // Try to advance reference. If unsuccessful, some other thread already did it
+            predecessor.next.compareAndSet(current, successor, false, false);
+            return true;
+        }
     }
 
     @Override
@@ -78,6 +98,7 @@ public class NonBlockingConcurrentSet<E> implements Set<E> {
         return false;
     }
 
+    // factors out functionality common to add and remove methods
     private SearchResult<E> search(Node<E> head, int hashCode) {
         Node<E> predecessor, current, successor;
         boolean[] marked = new boolean[1];

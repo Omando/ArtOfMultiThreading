@@ -127,12 +127,16 @@ public class LazyConcurrentSet<E> implements Set<E> {
     @Override
     public boolean contains(E item) {
         int itemHashCode = item.hashCode();
-        Node<E> current = sentinelHead.next;
-        while (current != null &&  itemHashCode > current.hashCode)
-            current = current.next;
 
-        return  current != null &&      // linked list is not empty or have not reached the end
-                !current.isMarked &&    // current node is not deleted
+        // Start at the head
+        Node<E> current = sentinelHead.next;
+
+        // Search for key
+        while (current != null &&  itemHashCode > current.hashCode)
+            current = current.next;                 // Traverse without locking (nodes may have been removed)
+
+        return  current != null &&                  // linked list is not empty or have not reached the end
+                !current.isMarked &&                // current node is not logically deleted
                 current.hashCode == itemHashCode;   // current node is equal to item of interest
     }
 
