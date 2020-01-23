@@ -148,5 +148,4 @@ public interface ConcurrentSetTests extends BaseSetTest  {
         // Assert that each thread removed a value
         assertEquals(threadCount, counter.get());
     }
-
 }

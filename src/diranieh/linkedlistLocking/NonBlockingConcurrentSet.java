@@ -66,7 +66,10 @@ public class NonBlockingConcurrentSet<E> implements Set<E> {
     @Override
     public boolean remove(E item) {
         int hashCode = item.hashCode();
+
+        // Keep trying if list is changes while traversing to find the given item
         while (true) {
+            // Find predecessor and current corresponding to item
             SearchResult<E> find = search(sentinelHead, item.hashCode());
             Node<E> predecessor = find.predecessor, current = find.current;
 
@@ -79,6 +82,7 @@ public class NonBlockingConcurrentSet<E> implements Set<E> {
             Node<E> successor = current.next.getReference();
 
             // marking successor as deleted!!??? DO NOT UNDERSTAND THIE LINE
+            // If marking doesn't work, retry. If it does, then just job essentially done
             if (!current.next.attemptMark(successor, true))
                 continue;
 
@@ -90,21 +94,24 @@ public class NonBlockingConcurrentSet<E> implements Set<E> {
 
     @Override
     public boolean contains(E item) {
-        return false;
+        // find predecessor and current entries
+        SearchResult<E> find = search(sentinelHead, item.hashCode());
+        return (find.current.hashCode == item.hashCode());
     }
 
     @Override
     public boolean isEmpty() {
-        return false;
+        Node<E> tail = sentinelHead.next.getReference();
+        return tail.hashCode == Integer.MAX_VALUE;
     }
 
     // factors out functionality common to add and remove methods
     private SearchResult<E> search(Node<E> head, int hashCode) {
         Node<E> predecessor, current, successor;
-        boolean[] marked = new boolean[1];
+        boolean[] marked = {false};
         boolean isDeleted;
 
-        // Keep on retrying
+        // Keep on retrying if list has changes while traversing
         retry: while(true) {
             // get  predecessor and current nodes, starting from the given head
             predecessor = head;
@@ -126,7 +133,7 @@ public class NonBlockingConcurrentSet<E> implements Set<E> {
                     // If compareAndSet fails, then restart traversal from the head of the list, otherwise
                     // the traversal continues
                     if (!isDeleted) continue retry;
-                    current = successor;
+                    current = predecessor.next.getReference();
                     successor = current.next.get(marked);   // on return marked[0] holds the value of the mark
                 }
 

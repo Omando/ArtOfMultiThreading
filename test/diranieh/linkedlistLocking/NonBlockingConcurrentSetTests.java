@@ -1,15 +1,14 @@
 package diranieh.linkedlistLocking;
 
-class LazyConcurrentSetTests implements SequentialSetTests, ConcurrentSetTests {
-
+public class NonBlockingConcurrentSetTests implements SequentialSetTests, ConcurrentSetTests {
     @Override
     public Set<String> createSet() {
-        return new LazyConcurrentSet<>();
+        return new NonBlockingConcurrentSet<>();
     }
 
     @Override
     public Set<String> createAndPopulateSet(Iterable<String> items) {
-        LazyConcurrentSet<String> set = new LazyConcurrentSet<>();
+        NonBlockingConcurrentSet<String> set = new NonBlockingConcurrentSet<>();
         for (String item: items) {
             set.add(item);
         }

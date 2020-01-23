@@ -142,7 +142,12 @@ public class LazyConcurrentSet<E> implements Set<E> {
 
     @Override
     public boolean isEmpty() {
-        return sentinelHead.next == null;
+        try {
+            sentinelHead.lock();
+            return  sentinelHead.next == null;
+        } finally {
+            sentinelHead.unlock();
+        }
     }
 
     // predecessor and current nodes are validated if both are NOT marked,
