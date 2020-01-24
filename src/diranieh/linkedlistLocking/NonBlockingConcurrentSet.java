@@ -81,13 +81,12 @@ public class NonBlockingConcurrentSet<E> implements Set<E> {
             // current.next
             Node<E> successor = current.next.getReference();
 
-            // marking successor as deleted!!??? DO NOT UNDERSTAND THIE LINE
             // If marking doesn't work, retry. If it does, then just job essentially done
             if (!current.next.attemptMark(successor, true))
                 continue;
 
             // Try to advance reference. If unsuccessful, some other thread already did it
-            predecessor.next.compareAndSet(current, successor, false, false);
+            boolean removed =  predecessor.next.compareAndSet(current, successor, false, false);
             return true;
         }
     }
@@ -138,7 +137,10 @@ public class NonBlockingConcurrentSet<E> implements Set<E> {
                 }
 
                 // All marked nodes (if any) removed by now. Check if we have found the node
-                // of interest, otherwise, loop and advance through the list
+                // of interest, otherwise, loop and advance through the list. Recall that tail
+                // has hashcode equal to INTEGER.MAX_VALUE:
+                //  If current.hashCode = hashCode, then item was found
+                //  If current.hashCode > hashCode, then item was not found
                 if (current.hashCode >= hashCode)
                     return new SearchResult<>(predecessor, current);
                 predecessor = current;
