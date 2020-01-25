@@ -2,7 +2,18 @@ package diranieh.linkedlistLocking;
 
 import java.util.concurrent.atomic.AtomicMarkableReference;
 
+/**
+ * Non-blocking concurrent set implemented using a linked list
+ * Note: While searching for nodes marked nodes are deleted. This means that the remove()
+ * method may not actually delete a node because it was already deleted during a search
+ * by another thread
+ * @param <E> the type of elements in this list
+ */
 public class NonBlockingConcurrentSet<E> implements Set<E> {
+
+    // The field 'next' is really a pair of two objects; the next node, as well as the
+    // Marked boolean flag belonging to THIS node, e.g., the Marked boolean inside the
+    // field names next does not belong to the next node, but to this node
     private static class Node<E> {
         private final E item;
         private final int hashCode;
@@ -87,6 +98,9 @@ public class NonBlockingConcurrentSet<E> implements Set<E> {
 
             // Try to advance reference. If unsuccessful, some other thread already did it
             boolean removed =  predecessor.next.compareAndSet(current, successor, false, false);
+
+            // Always return true because the node may have already been deleted by another thread
+            // while searching for a node (see search() method)
             return true;
         }
     }

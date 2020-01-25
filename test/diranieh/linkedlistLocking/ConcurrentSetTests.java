@@ -48,6 +48,8 @@ public interface ConcurrentSetTests extends BaseSetTest  {
         assertEquals(1, counter.get());
     }
 
+    // This test may occasionally fail for NonBlockingConcurrentSet. Please see note at the top
+    // of that class
     @RepeatedTest(100)
     default void when_multiple_threads_remove_same_value_one_thread_succeeds() throws InterruptedException {
         // Arrange
