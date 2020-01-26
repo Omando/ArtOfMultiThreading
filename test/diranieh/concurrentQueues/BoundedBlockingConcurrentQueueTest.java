@@ -1,7 +1,6 @@
 package diranieh.concurrentQueues;
 
 class BoundedBlockingConcurrentQueueTest implements SequentialQueueTests, ConcurrentQueueTests {
-
     @Override
     public Queue<Integer> createQueue(int capacity) {
         return new BoundedBlockingConcurrentQueue<Integer>(capacity);

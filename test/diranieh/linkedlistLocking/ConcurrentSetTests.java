@@ -25,7 +25,7 @@ public interface ConcurrentSetTests extends BaseSetTest  {
         Set<String> concurrentSet = createAndPopulateSet(List.of("A", "B", "C", "D"));
 
         // Act: multiple threads attempting to add the same value
-        String newValue = "E";
+        final String newValue = "E";
         for (int i = 0; i < threadCount; ++i) {
             executor.execute(() -> {
                 // Wait for signal from master thread to start running
@@ -60,7 +60,7 @@ public interface ConcurrentSetTests extends BaseSetTest  {
         Set<String> concurrentSet = createAndPopulateSet(List.of("A", "B", "C", "D"));
 
         // Act: multiple threads attempting to remove the same value
-        String valueToRemove = "A";
+        final String valueToRemove = "A";
         for (int i = 0; i < threadCount; ++i) {
             executor.execute(() -> {
                 // Wait for signal from master thread to start running
@@ -94,7 +94,7 @@ public interface ConcurrentSetTests extends BaseSetTest  {
 
         // Act: multiple threads each attempting to add a different value
         for (int i = 0; i < threadCount; ++i) {
-            int index = i;
+            final int index = i;
             executor.execute(() -> {
                 // Wait for signal from master thread to start running
                 try {
@@ -130,7 +130,7 @@ public interface ConcurrentSetTests extends BaseSetTest  {
 
         // Act: multiple threads each attempting to remove a different value
         for (int i = 0; i < threadCount; ++i) {
-            int index = i;
+            final int index = i;
             executor.execute(() -> {
                 // Wait for signal from master thread to start running
                 try {
