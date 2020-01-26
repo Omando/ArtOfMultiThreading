@@ -23,34 +23,28 @@ public class BoundedBlockingConcurrentQueue<E> implements Queue<E>  {
         }
     }
 
-    private final ReentrantLock enqLock;
-    private final Condition notFullCondition;     // condition predicate for enqLock used by enqueue
-    private final ReentrantLock deqLock;
-    private final Condition notEmptyCondition;    // condition predicate for deqLock used by dequeue
+    private final ReentrantLock enqLock = new ReentrantLock();
+    private final Condition notFullCondition = enqLock.newCondition();  // condition predicate for enqLock used by enqueue
+    private final ReentrantLock deqLock = new ReentrantLock();
+    private final Condition notEmptyCondition = deqLock.newCondition(); // condition predicate for deqLock used by dequeue
+    private final AtomicInteger size = new AtomicInteger(0);
     private final int capacity;
-    private final AtomicInteger size;
     private volatile Node<E> head;              // why volatile?
     private volatile Node<E> tail;              // why volatile?
 
     public BoundedBlockingConcurrentQueue(int capacity) {
         this.capacity = capacity;
-        enqLock = new ReentrantLock();
-        deqLock = new ReentrantLock();
-        notFullCondition = enqLock.newCondition();
-        notEmptyCondition = deqLock.newCondition();
-        size = new AtomicInteger(0);
         head = new Node<>(null);
         tail = head;
-
     }
 
     // Condition predicate that must be met is: 'queue is not full'.
     // enqueue method  must wait while condition predicate is not met, or in other words,
     // enqueue method  must wait while 'queue is not full' is not true
     @Override
-    public void enqueue(E element) {
-        boolean shouldWakeDequeuers = false;
-        enqLock.lock();
+    public void enqueue(E element) throws InterruptedException {
+        int previousSize = 0;
+        enqLock.lockInterruptibly();
         try {
             // Release lock and while the queue is full
             while (!isNotFull()) {          // or, while (isFull)
@@ -65,14 +59,7 @@ public class BoundedBlockingConcurrentQueue<E> implements Queue<E>  {
              tail = newNode;
 
              // New item added so increment size
-             int previousSize = size.getAndIncrement();
-
-             // Dequeuers will be blocked only if queue was empty. Wake all waiting dequeuers
-            // if queue transitions from empty to non-empty
-            if (previousSize == 0)
-                shouldWakeDequeuers = true;
-
-        } catch (InterruptedException ignored) {
+            previousSize = size.getAndIncrement();
         } finally {
             enqLock.unlock();
         }
@@ -80,7 +67,9 @@ public class BoundedBlockingConcurrentQueue<E> implements Queue<E>  {
         // Placing this block of code inside the previous try block after checking
         // if previouseSize == 0 would cause a deadlock, hence it is after enqLock
         // was released
-        if (shouldWakeDequeuers) {
+        // Dequeuers will be blocked only if queue was empty. Wake all waiting dequeuers
+        // if queue transitions from empty to non-empty
+        if (previousSize == 0) {
             deqLock.lock();
             try {
                 notEmptyCondition.signalAll();
@@ -91,10 +80,10 @@ public class BoundedBlockingConcurrentQueue<E> implements Queue<E>  {
     }
 
     @Override
-    public E dequeue() {
+    public E dequeue() throws InterruptedException {
         E dequeuedResult = null;
-        boolean shouldWakeEnqueuers = false;
-        deqLock.lock();
+        int previousSize = 0;
+        deqLock.lockInterruptibly();
         try {
             // Release lock and while the queue is empty
             while (!isNotEmpty()) {          // or, while (isEmpty)
@@ -102,17 +91,11 @@ public class BoundedBlockingConcurrentQueue<E> implements Queue<E>  {
             }
 
             // Queue is now not empty: remove item from the head of the queue
-            dequeuedResult = head.item;
+            dequeuedResult = head.next.item;
             head = head.next;
 
             // Existing item removed so decrement size
-            int previousSize = size.getAndDecrement();
-
-            // Enqueuers will be blocked only if queue was full. Wake all waiting enqueuers
-            // if queue transitions from full to not-full
-            if (previousSize == capacity)
-                shouldWakeEnqueuers = true;
-        } catch (InterruptedException ignored) {
+            previousSize = size.getAndDecrement();
         } finally {
             deqLock.unlock();
         }
@@ -120,7 +103,9 @@ public class BoundedBlockingConcurrentQueue<E> implements Queue<E>  {
         // Placing this block of code inside the previous try block after checking
         // if previouseSize == 0 would cause a deadlock, hence it is after enqLock
         // was released
-        if (shouldWakeEnqueuers) {
+        // Enqueuers will be blocked only if queue was full. Wake all waiting enqueuers
+        // if queue transitions from full to not-full
+        if (previousSize == capacity) {
             enqLock.lock();
             try {
                 notFullCondition.signalAll();
@@ -132,6 +117,10 @@ public class BoundedBlockingConcurrentQueue<E> implements Queue<E>  {
         return dequeuedResult;
     }
 
+    @Override
+    public boolean isEmpty() {
+        return size.get() == 0;
+    }
     private boolean isNotFull() {
         return size.get() < capacity;
     }
