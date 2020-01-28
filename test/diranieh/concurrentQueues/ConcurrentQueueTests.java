@@ -106,10 +106,16 @@ public interface ConcurrentQueueTests extends BaseQueueTest<Integer> {
         }
     }
 
+    // This test is not valid for UnboundedConcurrentQueue; this class throws an
+    // IllegalStateException if a thread attempts to dequeue from an empty queue.
+    // All other queue implmentations block until the queue is not empty.
     @RepeatedTest(100)
     default void should_enqueue_with_parallel_enqueuers_and_dequeue_with_parallel_dequeuers() throws InterruptedException {
         final CountDownLatch latch = new CountDownLatch(1);
         final Queue<Integer> queue = createQueue(TEST_SIZE);
+        if (queue.getClass() == UnboundedConcurrentQueue.class)
+            fail("This test does not apply to UnboundedConcurrentQueue");
+        
         boolean[] poppedItems = new boolean[TEST_SIZE];
         Thread[] threads = new Thread[THREAD_COUNT * 2]; // THREAD_COUNT threads for enqueueing
 
