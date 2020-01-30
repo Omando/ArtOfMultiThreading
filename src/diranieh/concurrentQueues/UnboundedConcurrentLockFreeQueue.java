@@ -21,6 +21,9 @@ public class UnboundedConcurrentLockFreeQueue<E> implements Queue<E>  {
     private AtomicReference<Node<E>> tail;
 
     public UnboundedConcurrentLockFreeQueue() {
+        // Create a sentinel node whose value is meaningless and points to
+        // nothing (next = null). Initially, both head and tail point to
+        // the sentinel
         Node<E> sentinel = new Node<>(null);
         head = new AtomicReference<>(sentinel);
         tail =  new AtomicReference<>(sentinel);
@@ -38,17 +41,14 @@ public class UnboundedConcurrentLockFreeQueue<E> implements Queue<E>  {
             Node<E> last = tail.get();
             Node<E> next = last.next.get();
 
-            // Do we have the tail
-            if (last == tail.get()) {
-                if (next == null) {
-                    // So far, last is actually the tail since last.next is null.
-                    // Attempt to set last.next to the new node, then move tail to
-                    // the new node
-                    if (last.next.compareAndSet(next, newNode))
+            if (last == tail.get()) {       // Do we have the tail?
+                if (next == null) {         // No other threads enqueue an item (but not yet advanced tail)?
+                    // So far, last is actually the tail since last.next is null. Attempt to
+                    // set last.next to the new node, then move (or advance) tail to the new node
+                    if (last.next.compareAndSet(next, newNode)) {
                         tail.compareAndSet(last, newNode);
-
-                    // All done
-                    return;
+                        return;
+                    }
                 } else {
                     // last is not the tail since last.next is now not null
                     // So move tail to next
@@ -62,17 +62,26 @@ public class UnboundedConcurrentLockFreeQueue<E> implements Queue<E>  {
     public E dequeue() throws InterruptedException {
         // A CAS requires a while(true) statement to keep on trying while CAS fails
         while (true) {
-            Node<E> first = head.get();
-            Node<E> next = first.next.get();
-            Node<E> last = tail.get();
+            Node<E> first = head.get();         // head points to a sentinel with no meaningful value
+            Node<E> successor = first.next.get();    // actual head is pointed to by the sentinal
+            Node<E> last = tail.get();          // tail node. See document on why this is needed
+
+            // The next three if statements check if the queue is empty
             if (first == head.get()) {
                 if (first == last) {
-                    if (next == null)
+                    if (successor == null)
                         throw new IllegalStateException("Queue is empty");
-                    tail.compareAndSet(last, next);
+
+                    // tail is behind, try to advance (see document for full explanation)
+                    tail.compareAndSet(last, successor);
                 } else {
-                    E value = next.item;
-                    if (head.compareAndSet(first, next))
+                    // Read value of successor
+                    E value = successor.item;
+
+                    // Since we have captured the value of teh successor, We 'dequeue' the
+                    // successor by making it the sentinel node (recall that we do not care
+                    // about the value of the sentinel)
+                    if (head.compareAndSet(first, successor))
                         return value;
                 }
             }
