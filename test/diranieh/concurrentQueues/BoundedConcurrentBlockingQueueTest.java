@@ -9,15 +9,15 @@ import java.util.concurrent.CountDownLatch;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
-class BoundedBlockingConcurrentQueueTest implements SequentialQueueTests, ConcurrentQueueTests {
+class BoundedConcurrentBlockingQueueTest implements SequentialQueueTests, ConcurrentQueueTests {
     @Override
     public Queue<Integer> createQueue(int capacity) {
-        return new BoundedBlockingConcurrentQueue<Integer>(capacity);
+        return new BoundedConcurrentBlockingQueue<Integer>(capacity);
     }
 
     @Override
     public Queue<Integer> createAndPopulateQueue(int capacity, Iterable<Integer> items) throws InterruptedException {
-        BoundedBlockingConcurrentQueue<Integer> queue = new BoundedBlockingConcurrentQueue<>(capacity);
+        BoundedConcurrentBlockingQueue<Integer> queue = new BoundedConcurrentBlockingQueue<>(capacity);
         for (Integer item: items) {
             queue.enqueue(item);
         }

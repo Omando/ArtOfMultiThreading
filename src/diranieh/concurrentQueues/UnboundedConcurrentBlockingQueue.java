@@ -6,7 +6,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * An unbounded concurrent queue implemented using a linked list
  * @param <E> the type of elements in this list
  */
-public class UnboundedConcurrentQueue<E> implements Queue<E>   {
+public class UnboundedConcurrentBlockingQueue<E> implements Queue<E>   {
     private static class Node<E> {
         private E item;
         private Node<E> next;
@@ -26,7 +26,7 @@ public class UnboundedConcurrentQueue<E> implements Queue<E>   {
     private volatile Node<E> head;
     private volatile Node<E> tail;
 
-    public UnboundedConcurrentQueue() {
+    public UnboundedConcurrentBlockingQueue() {
         head = new Node<>(null);
         tail = head;
     }

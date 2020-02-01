@@ -1,14 +1,14 @@
 package diranieh.concurrentQueues;
 
-class UnboundedConcurrentQueueTest implements SequentialQueueTests, ConcurrentQueueTests {
+class UnboundedConcurrentBlockingQueueTest implements SequentialQueueTests, ConcurrentQueueTests {
     @Override
     public Queue<Integer> createQueue(int capacityIgnored) {
-        return new UnboundedConcurrentQueue<>();
+        return new UnboundedConcurrentBlockingQueue<>();
     }
 
     @Override
     public Queue<Integer> createAndPopulateQueue(int capacityIgnored, Iterable<Integer> items) throws InterruptedException {
-        UnboundedConcurrentQueue<Integer> queue = new UnboundedConcurrentQueue<>();
+        UnboundedConcurrentBlockingQueue<Integer> queue = new UnboundedConcurrentBlockingQueue<>();
         for (Integer item: items) {
             queue.enqueue(item);
         }

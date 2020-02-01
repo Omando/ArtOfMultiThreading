@@ -8,7 +8,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * A bounded concurrent queue implemented using a linked list
  * @param <E> the type of elements in this list
  */
-public class BoundedBlockingConcurrentQueue<E> implements Queue<E>  {
+public class BoundedConcurrentBlockingQueue<E> implements Queue<E>  {
     private static class Node<E> {
         private E item;
         private Node<E> next;
@@ -32,7 +32,7 @@ public class BoundedBlockingConcurrentQueue<E> implements Queue<E>  {
     private volatile Node<E> head;              // why volatile?
     private volatile Node<E> tail;              // why volatile?
 
-    public BoundedBlockingConcurrentQueue(int capacity) {
+    public BoundedConcurrentBlockingQueue(int capacity) {
         this.capacity = capacity;
         head = new Node<>(null);
         tail = head;
