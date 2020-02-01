@@ -35,6 +35,7 @@ public interface ConcurrentSetTests extends BaseSetTest  {
                     if (added) counter.increment();
                     latchEnd.countDown();
                 } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();     // restore interrupt status
                     System.out.println("Thread interrupted");
                 }
             });
@@ -70,6 +71,7 @@ public interface ConcurrentSetTests extends BaseSetTest  {
                     if (removed) counter.increment();
                     latchEnd.countDown();
                 } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();     // restore interrupt status
                     System.out.println("Thread interrupted");
                 }
             });
@@ -103,6 +105,7 @@ public interface ConcurrentSetTests extends BaseSetTest  {
                     if (added) counter.increment();
                     latchEnd.countDown();
                 } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();     // restore interrupt status
                     System.out.println("Thread interrupted");
                 }
             });
@@ -139,6 +142,7 @@ public interface ConcurrentSetTests extends BaseSetTest  {
                     if (added) counter.increment();
                     latchEnd.countDown();
                 } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();     // restore interrupt status
                     System.out.println("Thread interrupted");
                 }
             });

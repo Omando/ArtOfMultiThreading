@@ -2,7 +2,18 @@ package diranieh.concurrentQueues;
 
 import java.util.concurrent.atomic.AtomicReference;
 
+/**
+ * An unbounded non-blocking concurrent queue implemented using a linked list
+ *
+ * Recall the characteristics of all nonblocking algorithms: some work is done
+ * speculatively and may have to be redone.
+ *
+ * @param <E> the type of elements in this list
+ */
 public class UnboundedConcurrentLockFreeQueue<E> implements Queue<E>  {
+
+    // To use CompareAndSet on a field, the field must be declared using one of AtomicX types.
+    // To support calling CompareAndSet on next, declare it as AtomicReference<Node<E>>
     private static class Node<E> {
         private E item;
         private AtomicReference<Node<E>> next;
