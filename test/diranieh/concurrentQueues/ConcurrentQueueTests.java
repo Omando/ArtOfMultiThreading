@@ -36,6 +36,7 @@ public interface ConcurrentQueueTests extends BaseQueueTest<Integer> {
                     }
                 } catch (InterruptedException exception) {
                     System.out.println("Error enqueueing: " + exception.getMessage());
+                    Thread.currentThread().interrupt();     // restore interrupt status
                 }
             });
             threads[i].start();
@@ -87,6 +88,7 @@ public interface ConcurrentQueueTests extends BaseQueueTest<Integer> {
                     }
                 } catch (InterruptedException exception) {
                     System.out.println("Error dequeueing: " + exception.getMessage());
+                    Thread.currentThread().interrupt();     // restore interrupt status
                 }
             });
             threads[i].start();
