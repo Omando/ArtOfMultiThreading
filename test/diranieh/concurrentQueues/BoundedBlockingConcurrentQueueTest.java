@@ -1,6 +1,8 @@
 package diranieh.concurrentQueues;
 
 import org.junit.jupiter.api.RepeatedTest;
+import org.junit.jupiter.api.Test;
+import org.opentest4j.AssertionFailedError;
 
 import java.util.concurrent.CountDownLatch;
 
@@ -22,6 +24,95 @@ class BoundedBlockingConcurrentQueueTest implements SequentialQueueTests, Concur
         return queue;
     }
 
+    @Test
+    void should_block_enqueuing_when_full() throws InterruptedException {
+        // Arrange
+        final int capacity = 10;
+        CountDownLatch latchStart = new CountDownLatch(1);
+        CountDownLatch latchFinish = new CountDownLatch(1);
+        Queue<Integer> queue = createQueue(capacity);
+
+        Thread thread = new Thread(() -> {
+            // Populate queue to capacity
+            for (int i = 0; i < capacity; ++i) {
+                try {
+                    queue.enqueue(i);
+                } catch (InterruptedException ignored) {}
+            }
+
+            // Let test main thread know we're ready for interrupt
+            latchStart.countDown();
+
+            // Act - should block until interrupted
+            try {
+                queue.enqueue(1000);
+                fail("Enqueue should have blocked");
+            } catch (InterruptedException dummy) {
+                Thread.currentThread().interrupt();     // restore interrupt status
+                System.out.println("Interrupted successfully");
+            } catch(AssertionFailedError dummy) {
+                /* Nothing to do. Let thread die */
+            }
+             finally {
+                // Let test main thread know we're done
+                latchFinish.countDown();
+            }
+        });
+        thread.start();
+
+        // Wait for thread to populate queue and be ready to be interrupted, then proceed
+        latchStart.await();
+        Thread.sleep(100);      // Allow time for queue.enqueue to be called
+
+        // Test would have failed, if queue.enqueue(1000) did not block
+        thread.interrupt();
+
+        // Wait for thread to complete then test the interrupt status flag
+        latchFinish.await();
+        boolean isInterrdupted = thread.isInterrupted();
+        assertTrue(isInterrdupted);
+    }
+
+    @Test
+    void should_block_dequeuing_when_empty() throws InterruptedException {
+        // Arrange
+        final int capacity = 10;
+        CountDownLatch latchStart = new CountDownLatch(1);
+        CountDownLatch latchFinish = new CountDownLatch(1);
+        Queue<Integer> queue = createQueue(capacity);
+
+        Thread thread = new Thread(() -> {
+            // Let test main thread know we're ready for interrupt
+            latchStart.countDown();
+
+            try {
+                // Act - should block until interrupted
+                queue.dequeue();
+                fail("dequeue should have blocked");
+            } catch (InterruptedException ignored) {
+                Thread.currentThread().interrupt();     // restore interrupt status
+                System.out.println("Interrupted successfully");
+            } catch(AssertionFailedError dummy) {
+                /* Nothing to do. Let thread die */
+            }
+            finally {
+                // Let test main thread know we're done
+                latchFinish.countDown();
+            }
+        });
+        thread.start();
+
+        // Wait for thread to be ready to be interrupted
+        latchStart.await();
+        Thread.sleep(100);      // Allow time for queue.dequeue to be called
+
+        // Test would have failed if queue.dequeue did not block
+        thread.interrupt();
+        latchFinish.await();
+        boolean isInterrdupted = thread.isInterrupted();
+        assertTrue(isInterrdupted);
+    }
+
     // This test is not valid for UnboundedConcurrentQueue; this class throws an
     // IllegalStateException if a thread attempts to dequeue from an empty queue.
     // All other queue implementations block until the queue is not empty.
@@ -29,9 +120,6 @@ class BoundedBlockingConcurrentQueueTest implements SequentialQueueTests, Concur
     void should_enqueue_with_parallel_enqueuers_and_dequeue_with_parallel_dequeuers() throws InterruptedException {
         final CountDownLatch latch = new CountDownLatch(1);
         final Queue<Integer> queue = createQueue(TEST_SIZE);
-        if (queue.getClass() == UnboundedConcurrentQueue.class)
-            fail("This test does not apply to UnboundedConcurrentQueue");
-
         boolean[] poppedItems = new boolean[TEST_SIZE];
         Thread[] threads = new Thread[THREAD_COUNT * 2]; // THREAD_COUNT threads for enqueueing
 
@@ -51,6 +139,7 @@ class BoundedBlockingConcurrentQueueTest implements SequentialQueueTests, Concur
                         queue.enqueue(startValue + j);
                     }
                 } catch (InterruptedException exception) {
+                    Thread.currentThread().interrupt();     // restore interrupt status
                     System.out.println("Error enqueueing: " + exception.getMessage());
                 }
             });
@@ -69,6 +158,7 @@ class BoundedBlockingConcurrentQueueTest implements SequentialQueueTests, Concur
                         }
                     }
                 } catch (InterruptedException exception) {
+                    Thread.currentThread().interrupt();     // restore interrupt status
                     System.out.println("Error dequeueing: " + exception.getMessage());
                 }
             });
