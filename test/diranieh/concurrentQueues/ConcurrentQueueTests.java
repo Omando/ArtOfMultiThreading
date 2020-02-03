@@ -10,10 +10,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public interface ConcurrentQueueTests extends BaseQueueTest<Integer> {
-    final static int THREAD_COUNT = 32;
-    final static int TEST_SIZE = 1024;
-    final static int ITEMS_PER_THREAD = TEST_SIZE / THREAD_COUNT;       // 1024/32 = 32
-
     // Multiple threads are used to concurrently enqueue items. Sequential code then
     // checks that all items were inserted correctly
     @RepeatedTest(100)

@@ -9,6 +9,10 @@ package diranieh.concurrentQueues;
  * are used for each concurrent queue implementation
  */
 public interface BaseQueueTest<E> {
+    final static int THREAD_COUNT = 32;
+    final static int TEST_SIZE = 1024;
+    final static int ITEMS_PER_THREAD = TEST_SIZE / THREAD_COUNT;       // 1024/32 = 32
+
     Queue<E> createQueue(int capacity);
     Queue<E> createAndPopulateQueue(int capacity, Iterable<E> items) throws InterruptedException;
 }
