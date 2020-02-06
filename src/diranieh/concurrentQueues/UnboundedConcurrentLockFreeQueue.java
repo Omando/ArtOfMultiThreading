@@ -41,7 +41,7 @@ public class UnboundedConcurrentLockFreeQueue<E> implements Queue<E>  {
     }
 
     @Override
-    public void enqueue(E element) throws InterruptedException {
+    public void enqueue(E element)  {
         // Create a new node with the value to be enqueued
         Node<E> newNode = new Node<>(element);
 
@@ -70,12 +70,12 @@ public class UnboundedConcurrentLockFreeQueue<E> implements Queue<E>  {
     }
 
     @Override
-    public E dequeue() throws InterruptedException {
+    public E dequeue()  {
         // A CAS requires a while(true) statement to keep on trying while CAS fails
         while (true) {
-            Node<E> first = head.get();         // head points to a sentinel with no meaningful value
-            Node<E> successor = first.next.get();    // actual head is pointed to by the sentinal
-            Node<E> last = tail.get();          // tail node. See document on why this is needed
+            Node<E> first = head.get();             // head points to a sentinel with no meaningful value
+            Node<E> successor = first.next.get();   // actual head is pointed to by the sentinal
+            Node<E> last = tail.get();              // tail node. See document on why this is needed
 
             // The next three if statements check if the queue is empty
             if (first == head.get()) {
