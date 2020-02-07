@@ -62,7 +62,8 @@ public class SynchronousDualQueue<E> implements Queue<E> {
         // We want to enqueue a new item. Type is ITEM
         Node<E> offer = new Node<>(element, NodeType.ITEM);
 
-        // CompareAndSet requries a loop to keep on trying until successful
+        // Non-blocking using CompareAndSet requires a loop to keep on
+        // trying until successful
         while (true) {
             Node<E> first = head.get();             // head points to a sentinel with no meaningful value
             Node<E> last = tail.get();              // tail node. See document on why this is needed
@@ -73,23 +74,25 @@ public class SynchronousDualQueue<E> implements Queue<E> {
                 Node<E> tailNext = last.next.get();
 
                 // Check if tail values are consistent
-                if (last == tail.get())  {
+                if (last == tail.get()) {
                     // If the tail field does not refer to the last node, advance the
                     // tail field, and start over
-                    if (tailNext != null)
+                    if (tailNext != null) {
                         tail.compareAndSet(last, tailNext);
-                }
-                // The tail field refers to the last node, so try to append the new
-                // node to the end of the queue such that last.next = the new node
-                else if(last.next.compareAndSet(tailNext, offer)) {
-                    // New node appended, try to advance the tail to the new node
-                    tail.compareAndSet(last, offer);
+                    }
 
-                    // Now spin waiting for the dequeuer to signal that it has dequeued
-                    // the item by setting the node's item to null
-                    while (offer.item.get() == element) {
-                        // Item has been dequeue; clean up by making the node the new
-                        // sentinel.
+                    // The tail field refers to the last node, so try to append the new
+                    // node to the end of the queue such that last.next = the new node
+                    else if (last.next.compareAndSet(tailNext, offer)) {
+                        // New node appended, try to advance the tail to the new node
+                        tail.compareAndSet(last, offer);
+
+                        // Now spin waiting for the dequeuer to signal that it has dequeued
+                        // the item by setting the node's item to null
+                        while (offer.item.get() == element) ; // spin!!
+
+                        // Item has been dequeued by a dequeuer; clean up by making the node
+                        // the new sentinel
                         Node<E> h = head.get();
                         if (offer == h.next.get()) {
                             head.compareAndSet(h, offer);
@@ -120,11 +123,72 @@ public class SynchronousDualQueue<E> implements Queue<E> {
 
     @Override
     public E dequeue()  {
-        return null;
+        // We want to create a reservation (placeholder)
+        Node<E> offer = new Node<>(null, NodeType.RESERVATION);
+
+        // Non-blocking using CompareAndSet requires a loop to keep on
+        // trying until successful
+        while (true) {
+            Node<E> h = head.get();             // head points to a sentinel with no meaningful value
+            Node<E> t = tail.get();              // tail node. See document on why this is needed
+
+            // Check whether the queue is empty or whether it already contains a reservation
+            // item waiting to be dequeued
+            if (h == t || t.type == NodeType.RESERVATION) {
+                Node<E> n = t.next.get();
+
+                // Check if tail values are consistent
+                if (t == tail.get()) {
+
+                    // If the tail field does not refer to the last node (because tail.next
+                    // is not null), advance the tail field to tail.next and start over
+                    if (n != null) {
+                        tail.compareAndSet(t, n);
+                    }
+
+                    // The tail field refers to the last node, so try to append the new
+                    // reservation (placeholdeR) to the end of the queue such that
+                    // tail.next = the new node
+                    else if (t.next.compareAndSet(n, offer)) {
+                        // Reservation node appended, try to advance the tail to the new node
+                        tail.compareAndSet(t, offer);
+
+                        // Now spin waiting for the enqueuer to signal that it has enqueued
+                        // an item by setting the node's item to a non-null value
+
+                        while (offer.item.get() == null); // spin!!
+
+                        // Item has been enqueued; clean up by making the node the new sentinel
+                        h = head.get();
+                        if (offer == h.next.get()) {
+                            head.compareAndSet(h, offer);
+                        }
+                        return offer.item.get();
+                    }
+                }
+            } else {
+                // The queue is not empty and there is no item to be dequeued.
+                // Determine if we have an inconsistent (transient) snapshot
+                Node<E> n = h.next.get();
+                if (t != tail.get() || h != head.get() || n == null) {
+                    continue; // inconsistent snapshot
+                }
+
+                // The queue contains an item from an enqueuer waiting dequeued
+                // Compare data of the enqueued item node, and if equal replace null
+                // and return the item
+                E item = n.item.get();
+                boolean success = n.item.compareAndSet(item, null);
+                head.compareAndSet(h, n);
+                if (success) {
+                    return item;
+                }
+            }
+        }
     }
 
     @Override
     public boolean isEmpty() {
-        return false;
+        return head.get() == tail.get();
     }
 }
