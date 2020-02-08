@@ -9,8 +9,13 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 class SynchronousDualQueueTest {
-    final static int THREAD_COUNT = 32;      // 32;
-    final static int TEST_SIZE = 1024;         // 1024;
+
+    // To better understand the implementation, run the concurrent test with
+    // THREAD_COUNT = 1 and TEST_SIZE = 2. This creates one producer thread
+    // and one consumer thread, with the producer enqueuing 2 items and the
+    // consumer dequeuing the same 2.
+    final static int THREAD_COUNT = 1;      // 32;
+    final static int TEST_SIZE = 2;         // 1024;
     final static int ITEMS_PER_THREAD = TEST_SIZE / THREAD_COUNT;       // 1024/32 = 32
 
     private Queue<Integer> createQueue() {
@@ -25,6 +30,7 @@ class SynchronousDualQueueTest {
         // Assert
         assertTrue(queue.isEmpty());
     }
+
 
     @RepeatedTest(100)
     void should_enqueue_with_parallel_enqueuers_and_dequeue_with_parallel_dequeuers() throws InterruptedException {
