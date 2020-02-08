@@ -65,8 +65,8 @@ public class SynchronousDualQueue<E> implements Queue<E> {
         // Non-blocking using CompareAndSet requires a loop to keep on
         // trying until successful
         while (true) {
-            Node<E> first = head.get();             // head points to a sentinel with no meaningful value
-            Node<E> last = tail.get();              // tail node. See document on why this is needed
+            Node<E> first = head.get();    // head points to a sentinel with no meaningful value
+            Node<E> last = tail.get();     // tail node. See document on why this is needed
 
             // Check whether the queue is empty or whether it contains an enqueued
             // item waiting to be dequeued
@@ -107,10 +107,10 @@ public class SynchronousDualQueue<E> implements Queue<E> {
                 if (last != tail.get() || first != head.get() || next == null)
                     continue;
 
-                // The queue contains a reservation from a dequeuer waiting to be fulfilled
-                // The reservation item should have its value set to null, meaning that the
-                // dequeuer is waiting for the enqueuer to inject into item into that placeholder
-                // so that the dequeuer can dequeue it
+                // The queue contains a reservation from a dequeuer waiting to be fulfilled,
+                // with the reservation's item value equal to null. This means that the dequeuer
+                // is waiting for the enqueuer to place a value in that placeholder so that the
+                // dequeuer can dequeue it
                 // Compare data of the reserved node to null, and if equal replace with the
                 // item the user wants to enqueue
                 boolean success = next.item.compareAndSet(null, element );
@@ -129,8 +129,8 @@ public class SynchronousDualQueue<E> implements Queue<E> {
         // Non-blocking using CompareAndSet requires a loop to keep on
         // trying until successful
         while (true) {
-            Node<E> h = head.get();             // head points to a sentinel with no meaningful value
-            Node<E> t = tail.get();              // tail node. See document on why this is needed
+            Node<E> h = head.get();    // head points to a sentinel with no meaningful value
+            Node<E> t = tail.get();    // tail node. See document on why this is needed
 
             // Check whether the queue is empty or whether it already contains a reservation
             // item waiting to be dequeued
@@ -174,9 +174,10 @@ public class SynchronousDualQueue<E> implements Queue<E> {
                     continue; // inconsistent snapshot
                 }
 
-                // The queue contains an item from an enqueuer waiting dequeued
-                // Compare data of the enqueued item node, and if equal replace null
-                // and return the item
+                // The queue contains an item from an enqueuer waiting to be dequeued.
+                // Get the enqueued item (to be returned as value of this function) and
+                // CAS item with null to tell the enqueuer that the dequeuer has processed it.
+                // We then return the item's value as the dequeued value
                 E item = n.item.get();
                 boolean success = n.item.compareAndSet(item, null);
                 head.compareAndSet(h, n);
