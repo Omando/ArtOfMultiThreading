@@ -14,9 +14,9 @@ class SynchronousDualQueueTest {
     // THREAD_COUNT = 1 and TEST_SIZE = 2. This creates one producer thread
     // and one consumer thread, with the producer enqueuing 2 items and the
     // consumer dequeuing the same 2.
-    final static int THREAD_COUNT = 1;      // 32;
-    final static int TEST_SIZE = 2;         // 1024;
-    final static int ITEMS_PER_THREAD = TEST_SIZE / THREAD_COUNT;       // 1024/32 = 32
+    final static int THREAD_COUNT = 32;      // 32;
+    final static int TEST_SIZE = 2048;       // 1024;
+    final static int ITEMS_PER_THREAD = TEST_SIZE / THREAD_COUNT;       // 2048/32 = 64
 
     private Queue<Integer> createQueue() {
         return new SynchronousDualQueue<>();
@@ -32,7 +32,7 @@ class SynchronousDualQueueTest {
     }
 
 
-    @RepeatedTest(100)
+    @RepeatedTest(500)
     void should_enqueue_with_parallel_enqueuers_and_dequeue_with_parallel_dequeuers() throws InterruptedException {
         final CountDownLatch latch = new CountDownLatch(1);
         final Queue<Integer> queue = createQueue();
