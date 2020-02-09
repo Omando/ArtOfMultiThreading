@@ -40,7 +40,7 @@ public class SynchronousDualQueue<E> implements Queue<E> {
         }
 
         public String toString() {
-            return String.format("Node[Type = %1s, Item = %2s, Next = %3s]", type, item, next);
+            return String.format("%1s, %2s, (%3s)", type, item, next);
         }
     }
 
@@ -60,6 +60,8 @@ public class SynchronousDualQueue<E> implements Queue<E> {
     public void enqueue(E element) {
 
         // We want to enqueue a new item. Type is ITEM
+        if (element == null)
+            throw new IllegalStateException("Enqueuing nulls is not allowed");
         Node<E> offer = new Node<>(element, NodeType.ITEM);
 
         // Non-blocking using CompareAndSet requires a loop to keep on
@@ -179,6 +181,8 @@ public class SynchronousDualQueue<E> implements Queue<E> {
                 // CAS item with null to tell the enqueuer that the dequeuer has processed it.
                 // We then return the item's value as the dequeued value
                 E item = n.item.get();
+                if (item == null)
+                    continue;
                 boolean success = n.item.compareAndSet(item, null);
                 head.compareAndSet(h, n);
                 if (success) {
