@@ -1,9 +1,12 @@
 package diranieh.concurrentStacks;
 
+import java.util.EmptyStackException;
+import java.util.concurrent.atomic.AtomicReference;
+
 public class ConcurrentLockFreeStack<E> implements Stack<E> {
     private static class Node<E> {
         private E item;
-        private Node<E> next;
+        private AtomicReference<Node<E>> next;
 
         public Node(E item) {
             this(item, null);
@@ -11,7 +14,7 @@ public class ConcurrentLockFreeStack<E> implements Stack<E> {
 
         public Node(E item, Node<E> next) {
             this.item = item;
-            this.next = next;
+            this.next = new AtomicReference<>(next);
         }
     }
 
@@ -31,14 +34,29 @@ public class ConcurrentLockFreeStack<E> implements Stack<E> {
 
         // Keep on retrying until successful
         while (true) {
-            // Add CAS logic here
+            // Get current item at head
+            Node<E> top = head.next.get();
+            newNode.next.set(top);
+            if (head.next.compareAndSet(top, newNode))
+                return;
         }
     }
 
     @Override
     public E pop() {
+        while (true) {
+            Node<E> top = head.next.get();
+            if (top == null)
+                throw new EmptyStackException();
 
-        // TODO
-        return null;
+            Node<E> next = top.next.get();
+            if (head.next.compareAndSet(top, next))
+                return top.item;
+        }
+    }
+
+    @Override
+    public boolean isEmpty() {
+        return head == tail;
     }
 }
