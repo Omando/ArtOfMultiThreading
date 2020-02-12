@@ -9,7 +9,7 @@ package diranieh.concurrentStacks;
  */
 public interface BaseStackTest<E> {
     final static int THREAD_COUNT = 32;
-    final static int TEST_SIZE = 1024;
+    final static int TEST_SIZE = 2048;
     final static int ITEMS_PER_THREAD = TEST_SIZE / THREAD_COUNT;       // 1024/32 = 32
 
     Stack<E> createStack();
