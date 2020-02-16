@@ -105,6 +105,7 @@ public class EliminationExchanger<E> {
                         return yourItem;
                     break;
                 case BUSY:
+                    // Two other threads are currently using the slot for an exchange. Retry
                     break;
                 default:
                     throw new IllegalStateException("Unknown slot state: " + stamp);
