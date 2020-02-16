@@ -1,6 +1,5 @@
 package diranieh.concurrentStacks;
 
-import java.util.EmptyStackException;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class ConcurrentLockFreeStack<E> implements Stack<E> {
@@ -20,11 +19,9 @@ public class ConcurrentLockFreeStack<E> implements Stack<E> {
 
     // Sentinels
     private Node<E> head;
-    private Node<E> tail;
 
     public ConcurrentLockFreeStack() {
             head =  new Node<>(null);
-            tail = head;
     }
 
     @Override
@@ -47,7 +44,7 @@ public class ConcurrentLockFreeStack<E> implements Stack<E> {
         while (true) {
             Node<E> top = head.next.get();
             if (top == null)
-                throw new EmptyStackException();
+                return null;
 
             Node<E> next = top.next.get();
             if (head.next.compareAndSet(top, next))
@@ -57,6 +54,6 @@ public class ConcurrentLockFreeStack<E> implements Stack<E> {
 
     @Override
     public boolean isEmpty() {
-        return head == tail;
+        return head.next.get() == null;
     }
 }
