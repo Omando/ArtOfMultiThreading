@@ -21,7 +21,9 @@ import java.util.concurrent.atomic.AtomicStampedReference;
  */
 
 public class EliminationExchanger<E> {
-    private static final int EMPTY = 0, WAITING = 1, BUSY = 2;
+    private static final int EMPTY = 0;     // Slot is empty
+    private static final int WAITING = 1;   // A thread is waiting for rendez-vous with another thread at affected slot
+    private static final int BUSY = 2;      // Other threads busy with rendez-vous at affected slot
     private AtomicStampedReference<E> slot = new AtomicStampedReference<>(null, 0);
 
     /* A thread attempts to exchange values by reading the state of the slot and
@@ -61,7 +63,7 @@ public class EliminationExchanger<E> {
             E yourItem = slot.get(stampHolder);
             int stamp = stampHolder[0];
 
-            // Check state of the slot
+            // Check state of the slot. Exchange slot has three states: EMPTY, WAITING and BUSY
             switch (stamp) {
                 case EMPTY:
                     // Try to place an item in the slot and set slot state to WAITING;
