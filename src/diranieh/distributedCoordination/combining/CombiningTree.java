@@ -2,6 +2,8 @@ package diranieh.distributedCoordination.combining;
 
 import diranieh.utilities.ThreadNumberGenerator;
 
+import java.util.Stack;
+
 /**
  * Manages navigation in a binary tree
  */
@@ -42,6 +44,7 @@ public class CombiningTree implements ICombiningTree {
         // by 2 in the code below
         Node myLeaf = leaf[ThreadNumberGenerator.get() / 2];
 
+        /* PRE-COMBINING PHASE */
         // Start at leaf node and work your way up to the root IF AND ONLY IF
         // this thread is the first to arrive at the node (see precombine impl)
         Node node = myLeaf;
@@ -52,7 +55,24 @@ public class CombiningTree implements ICombiningTree {
         // at which the thread arrived the second
         Node stop = node;
 
+        /* COMBINING PHASE */
+        node = myLeaf;          // IMPORTANT to note that the combining phase starts from the leaf
+        int combined = 1;       // Increment by 1 (could be passed as a ctor parameter to create a custom counter)
+        Stack<Node> stack = new Stack<>();
+        while (node != stop) {                      // Revisit nodes visited in phase 1
+            combined = node.combine(combined);      // Accumulate combined values, if any
+            stack.push(node);                       // Path will be retraversed in reverse order in the next phase
+            node = node.parent;                     // Move up the tree
+        }
 
-        return 0;
+        /* OPERATION PHASE */
+        int prior = stop.operation(combined);       // Get result of combining on the stop node
+
+        /* DISTRIBUTION PHASE*/
+        while (!stack.empty()) {        // Traverse path in reverse order
+            node = stack.pop();
+            node.distribute(prior);     // distribute results to waiting second threads
+        }
+        return prior;                   // return result to caller
     }
 }
