@@ -39,27 +39,86 @@ public class Node {
             while (locked)
                 wait();
 
-            // Check combining status
+            // Check pre-combining status
             switch (state) {
-                // Thread will return to check for a value to combine with
-                case IDLE:
+                case IDLE:              // Thread will return to check for a value to combine with
                     state = State.FIRST;
                     return true;        // continue up the tree
-                // An earlier thread has previously visited this node.
-                case FIRST:
-                    // First thread is moving up, so lock the tree to prevent the earlier
+                case FIRST:             // An earlier thread has previously visited this node.
+                    // The earlier thread is moving up, so lock the tree to prevent the earlier
                     // visiting thread from proceeding without combining with this thread’s
                     // value.
                     locked = true;
                     state = State.SECOND;   // Prepare to deposit 2nd value
                     return false;           // End of phase 1. Do not move up the tree
-                // Can't continue up the tree if this is the root
-                case ROOT:
+                case ROOT:                  // Can't continue up the tree if this is the root
                     return false;           // End of phase 1. Do not move up the tree
-                // Programming defensively ... check for illegal states
-                default:
+                default:                    // Programming defensively; check for illegal states
                     throw new IllegalStateException("Unknown state: " + state);
             }
+        }
+    }
+
+    public int combine(int combined) throws InterruptedException {
+        synchronized (locker) {
+            while (locked) wait();      // wait here until node is unlocked
+
+            locked = true;              // Lock out late attempts to combine
+            firstValue = combined;      // Remember our contribution
+            switch (state) {            // Check combining status
+                case FIRST:             // First thread is done
+                    return firstValue;
+                case SECOND:            // Combine with second thread
+                    return firstValue + secondValue;
+                default:                // Programming defensively; check for illegal states
+                    throw new IllegalStateException("Unknown state: " + state);
+            }
+        }
+    }
+
+    public int operation(int combined) throws InterruptedException {
+        synchronized (locker) {
+            switch (state) {
+                case ROOT:
+                    int oldValue = result;      // cache prior value
+                    result += combined;         // add sum to root
+                    return oldValue;            // return prior value
+                case SECOND:
+                    secondValue = combined;     // deposit value for later combining
+                    locked = false;             // unlock node and notify 1st thread
+                    notifyAll();
+
+                    while (state != State.RESULT)   // wait for 1st thread to deliver result
+                        wait();
+
+                    // Unlock node and return
+                    locked = false;
+                    notifyAll();
+                    state = State.IDLE;
+                    return result;
+                default:                        // Programming defensively; check for illegal states
+                    throw new IllegalStateException("Unknown state: " + state);
+            }
+        }
+    }
+
+    public void distribute(int prior) {
+        synchronized (locker) {
+            switch (state) {
+                case FIRST:
+                    // No combining, unlock node and reset
+                    state = State.IDLE;
+                    locked = false;
+                    break;
+                case SECOND:
+                    // Notify second thread that result is available
+                    result = prior + firstValue;
+                    state = State.RESULT;
+                    break;
+                default:                        // Programming defensively; check for illegal states
+                    throw new IllegalStateException("Unknown state: " + state);
+            }
+            notifyAll();
         }
     }
 }
