@@ -1,6 +1,7 @@
 package diranieh.playground;
 
 import org.junit.jupiter.api.RepeatedTest;
+import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
@@ -34,5 +35,33 @@ public class PlaygroundTests {
         // Wait for thread to stop
         thread.join(1000);
         assertFalse(thread.isAlive());
+    }
+
+    @Test
+    void preAndpost() {
+        int a = 4;
+        System.out.println("a++ = " + a++);     // output = 4, then a = 5
+        System.out.println("++a = " + ++a);     // output = 6, then a = 6
+
+        int x = 4;
+        var result1 = x++ + ++x;    // 4 + 6 = 10
+        System.out.println(result1);
+
+        x = 4;
+        var result2 = x-- - --x;    // 4 - 2 = 2
+        System.out.println(x);
+
+        int index = 0;
+        int result_post = postIncrement(index);     // result_post = 0;
+        int result_pre = preIncrement(index);       // result_pre = 1
+
+    }
+
+    private int postIncrement(int index) {
+        return index++;
+    }
+
+    private int preIncrement(int index) {
+        return ++index;
     }
 }
