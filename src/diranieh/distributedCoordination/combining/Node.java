@@ -37,7 +37,7 @@ public class Node {
 
             // Wait while the node is locked
             while (locked)
-                wait();
+                locker.wait();
 
             // Check pre-combining status
             switch (state) {
@@ -61,7 +61,7 @@ public class Node {
 
     public int combine(int combined) throws InterruptedException {
         synchronized (locker) {
-            while (locked) wait();      // wait here until node is unlocked
+            while (locked) locker.wait();      // wait here until node is unlocked
 
             locked = true;              // Lock out late attempts to combine
             firstValue = combined;      // Remember our contribution
@@ -86,14 +86,14 @@ public class Node {
                 case SECOND:
                     secondValue = combined;     // deposit value for later combining
                     locked = false;             // unlock node and notify 1st thread
-                    notifyAll();
+                    locker.notifyAll();
 
                     while (state != State.RESULT)   // wait for 1st thread to deliver result
-                        wait();
+                        locker.wait();
 
                     // Unlock node and return
                     locked = false;
-                    notifyAll();
+                    locker.notifyAll();
                     state = State.IDLE;
                     return result;
                 default:                        // Programming defensively; check for illegal states
@@ -118,7 +118,7 @@ public class Node {
                 default:                        // Programming defensively; check for illegal states
                     throw new IllegalStateException("Unknown state: " + state);
             }
-            notifyAll();
+            locker.notifyAll();
         }
     }
 }
