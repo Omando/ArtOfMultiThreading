@@ -4,21 +4,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 public abstract class BaseHashSet<E> {
+    // The underlying data structure is an array of lists
     protected List<E>[] table;
     protected int size;
 
-    public BaseHashSet(int capacity) {
+    public BaseHashSet(int initialCapacity) {
 
-        // Count of items is initially zero
+        // Count of all items is initially zero
         size = 0;
 
-        // Create a hash table with the required capacity
-        table = new List[capacity];
-
-        // Each hash table entry (bucket) is initialized as an empty list
-        for (int i = 0; i < capacity ; i++) {
-            table[i] = new ArrayList<>();
-        }
+        // Create and initialize the underlying hash table
+        table = createAndInitializeHashTable(initialCapacity);
     }
 
     public boolean contains(E item) {
@@ -41,18 +37,21 @@ public abstract class BaseHashSet<E> {
             // Calculate hash to identify bucket index within table
             int hashCode = calculateHashCode(item);
 
-            // Add the item
-            added = table[hashCode].add(item);
-
-            // Update size if item was added
-            size = (added)? size+1 : size;
-
+            // Add the item if and only if it does not currently exist
+            if (!table[hashCode].contains(item)) {
+                table[hashCode].add(item);
+                size++;
+                added = true;
+            }
         } finally {
             release(item);
         }
 
         // Check if we need to adjust the size
-        if (added && policy())
+        // This is a check-then-act idiom and is thread-unsafe. See resize() implementation
+        // in the derived class where check-then-act is done in a thread-safe manner inside
+        // the resize method
+        if (added && shouldResize())
             resize();
 
         return added;
@@ -64,26 +63,40 @@ public abstract class BaseHashSet<E> {
             // Calculate hash to identify bucket index within table
             int hashCode = calculateHashCode(item);
 
-            // Remove the item
+            // Remove the item if it already exists
             boolean removed = table[hashCode].remove(item);
 
             // Update size if item was added
-            size = (removed)? size-1 : size;
+            if (removed)
+                size--;
+
             return removed;
         } finally {
             release(item);
         }
     }
 
-    public abstract void acquire(E x);
+    protected abstract void acquire(E x);
 
-    public abstract void release(E x);
+    protected abstract void release(E x);
 
-    public abstract void resize();
+    protected abstract void resize();
 
-    public abstract boolean policy();
+    protected abstract boolean shouldResize();
 
-    private int calculateHashCode(E item) {
+    protected int calculateHashCode(E item) {
         return Math.abs(item.hashCode() % table.length);
+    }
+
+    protected List<E>[] createAndInitializeHashTable(int capacity) {
+        // Create a hash table with the required capacity
+        // Each hash table entry (bucket) is initialized as an empty list
+        List<E>[] newTable = (List<E>[])new List[capacity];
+
+        for (int i = 0; i < capacity ; i++) {
+            newTable[i] = new ArrayList<>();
+        }
+
+        return newTable;
     }
 }
