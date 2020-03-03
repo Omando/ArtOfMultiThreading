@@ -48,7 +48,7 @@ public class stepDefinitions implements En {
 
         Then("only these items should exist", (DataTable data) -> {
             List<Integer> numbers = data.asList(Integer.class);
-            Assertions.assertEquals(2, hashSet.size);
+            Assertions.assertEquals(2, hashSet.size.get());
             numbers.forEach(number -> {
                 Assertions.assertTrue( hashSet.contains(number));
             });
@@ -119,9 +119,9 @@ public class stepDefinitions implements En {
         });
 
         Then("total item count is {int}", (Integer totalItemCount) -> {
-            if (totalItemCount != hashSet.size)
+            if (totalItemCount != hashSet.size.get())
                 fail("failed");
-            assertEquals(totalItemCount, hashSet.size);
+            assertEquals(totalItemCount, hashSet.size.get());
         });
 
         And("all items are added from all threads", () -> {

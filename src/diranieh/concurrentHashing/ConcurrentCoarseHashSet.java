@@ -68,7 +68,7 @@ public class ConcurrentCoarseHashSet<E> extends BaseHashSet<E> {
 
     @Override
     protected boolean shouldResize() {
-        double avgBucketSize = 1.0 * size / table.length;
+        double avgBucketSize = 1.0 * size.get() / table.length;
         return avgBucketSize > bucketSizeThreshold;
     }
 }

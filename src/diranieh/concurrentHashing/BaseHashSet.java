@@ -2,16 +2,19 @@ package diranieh.concurrentHashing;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public abstract class BaseHashSet<E> {
     // The underlying data structure is an array of lists
     protected List<E>[] table;
-    protected int size;
+    //protected int size;
+    protected AtomicInteger size;
 
     public BaseHashSet(int initialCapacity) {
 
         // Count of all items is initially zero
-        size = 0;
+        //size = 0;
+        size = new AtomicInteger(0);
 
         // Create and initialize the underlying hash table
         table = createAndInitializeHashTable(initialCapacity);
@@ -40,7 +43,9 @@ public abstract class BaseHashSet<E> {
             // Add the item if and only if it does not currently exist
             if (!table[hashCode].contains(item)) {
                 table[hashCode].add(item);
-                size++;
+                //++size;
+                size.incrementAndGet();
+                System.out.println("Added " + item + " size = " + size);
                 added = true;
             }
         } finally {
@@ -51,7 +56,7 @@ public abstract class BaseHashSet<E> {
         // This is a check-then-act idiom and is thread-unsafe. See resize() implementation
         // in the derived class where check-then-act is done in a thread-safe manner inside
         // the resize method
-        if (added && shouldResize())
+        if (shouldResize())
             resize();
 
         return added;
@@ -66,9 +71,10 @@ public abstract class BaseHashSet<E> {
             // Remove the item if it already exists
             boolean removed = table[hashCode].remove(item);
 
-            // Update size if item was added
+            // Update size if item was removed
             if (removed)
-                size--;
+                //size--;
+                size.decrementAndGet();
 
             return removed;
         } finally {
@@ -93,6 +99,7 @@ public abstract class BaseHashSet<E> {
         // Each hash table entry (bucket) is initialized as an empty list
         List<E>[] newTable = (List<E>[])new List[capacity];
 
+        // Each bucket is an un-synchronized List<E>
         for (int i = 0; i < capacity ; i++) {
             newTable[i] = new ArrayList<>();
         }
