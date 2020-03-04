@@ -115,12 +115,10 @@ public class stepDefinitions implements En {
             for (int i = 0; i < this.threadCount; i ++) {
                 threads[i].join();
             }
-            System.out.println("All thread termianted...");
+            System.out.println("All threads completed...");
         });
 
         Then("total item count is {int}", (Integer totalItemCount) -> {
-            if (totalItemCount != hashSet.size.get())
-                fail("failed");
             assertEquals(totalItemCount, hashSet.size.get());
         });
 

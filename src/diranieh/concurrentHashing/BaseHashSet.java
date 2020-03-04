@@ -7,13 +7,14 @@ import java.util.concurrent.atomic.AtomicInteger;
 public abstract class BaseHashSet<E> {
     // The underlying data structure is an array of lists
     protected List<E>[] table;
-    //protected int size;
     protected AtomicInteger size;
 
+    /* Lock striping ensures synchronized access to individual hashtable buckets,
+    but the size parameter is a shared variable modified by different threads that
+    must be protected, hence the use of an AtomicInteger  */
     public BaseHashSet(int initialCapacity) {
 
         // Count of all items is initially zero
-        //size = 0;
         size = new AtomicInteger(0);
 
         // Create and initialize the underlying hash table
@@ -43,7 +44,6 @@ public abstract class BaseHashSet<E> {
             // Add the item if and only if it does not currently exist
             if (!table[hashCode].contains(item)) {
                 table[hashCode].add(item);
-                //++size;
                 size.incrementAndGet();
                 System.out.println("Added " + item + " size = " + size);
                 added = true;
@@ -73,7 +73,6 @@ public abstract class BaseHashSet<E> {
 
             // Update size if item was removed
             if (removed)
-                //size--;
                 size.decrementAndGet();
 
             return removed;
