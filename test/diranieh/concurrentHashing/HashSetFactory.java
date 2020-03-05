@@ -8,4 +8,8 @@ public class HashSetFactory<E> {
     public BaseHashSet<E> getStriped(int capacity, int threshold) {
         return new ConcurrentStripedHashSet<>(capacity, threshold);
     }
+
+    public BaseHashSet<E> getRefined(int capacity, int threshold) {
+        return new ConcurrentRefinedStripedHashSet<E>(capacity, threshold);
+    }
 }
