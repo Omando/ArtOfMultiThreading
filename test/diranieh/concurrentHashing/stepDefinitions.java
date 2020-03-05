@@ -33,6 +33,8 @@ public class stepDefinitions implements En {
                     break;
                 case "Striped":
                     hashSet = factory.getStriped(capacity, threshold);
+                case "Refined":
+                    hashSet = factory.getRefined(capacity, threshold);
             }
         });
 

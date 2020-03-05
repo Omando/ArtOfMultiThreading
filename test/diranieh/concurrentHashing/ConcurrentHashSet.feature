@@ -1,6 +1,6 @@
 Feature: Concurrent hash set
 
-  Scenario Outline: hash set should add and remove
+  Scenario Outline: hashset should add and remove
     Given capacity is 5 and bucket threshold is 2
     And implementation is <implementation>
     When I add the following items
@@ -20,8 +20,9 @@ Feature: Concurrent hash set
     |implementation  |
     |"Coarse"        |
     |"Striped"       |
+    |"Refined"       |
 
-  Scenario Outline: hash set should increase capacity
+  Scenario Outline: hashset should increase capacity
     Given capacity is 5 and bucket threshold is 2
     And implementation is <implementation>
     When I add 15 numbers
@@ -30,6 +31,7 @@ Feature: Concurrent hash set
       |implementation   |
       |"Coarse"         |
       |"Striped"        |
+      |"Refined"        |
 
   Scenario Outline: hashset concurrent access
     Given capacity is 5 and bucket threshold is 10
@@ -51,6 +53,11 @@ Feature: Concurrent hash set
       |4            |2          |8               |"Striped"        |
       |8            |8          |64              |"Striped"        |
       |10            |10        |100             |"Striped"        |
+      |1            |3          |3               |"Refined"        |
+      |2            |2          |4               |"Refined"        |
+      |4            |2          |8               |"Refined"        |
+      |8            |8          |64              |"Refined"        |
+      |10            |10        |100             |"Refined"        |
 
 
     # Add other scenarios for removing ...
