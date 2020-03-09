@@ -53,12 +53,19 @@ public class BucketList<E> {
 
     public boolean contains(E item) {
         int key = makeOrdinaryKey(item);
-        SearchResult searchResult = find(key);
+        SearchResult<E> searchResult = find(key);
         return (searchResult.current.key == key);
     }
 
-    private SearchResult find(int key) {
-        return null;    // todo
+    private SearchResult<E> find(int key) {
+        Node<E> predecessor = head;
+        Node<E> current = head.getNext();
+        while (current.key < key) {
+            predecessor = current;
+            current = current.getNext();
+        }
+
+        return new SearchResult<E>(predecessor, current);
     }
     // Creating keys for ordinary and sentinel nodex
     private int makeOrdinaryKey(E item) {
