@@ -5,8 +5,8 @@ import java.util.concurrent.atomic.AtomicMarkableReference;
 import static java.lang.Integer.reverse;
 
 public class BucketList<E> {
-    static final int HI_MASK  = 0X80000000;
-    static final int MASK = 0X00FFFFFF;
+    static final int MSB_ON_MASK  = 0X80000000;
+    static final int LOWEST_3_BYTES_MASK = 0X00FFFFFF;
     Node<E> head;
 
     private static class Node<E> {
@@ -27,6 +27,20 @@ public class BucketList<E> {
             this.value = null;
             this.next = new AtomicMarkableReference<>(null, false);
         }
+
+        private Node<E> getNext() {
+            return null;    // TODO
+        }
+    }
+
+    private static class SearchResult<E> {
+        private Node<E> predecessor;
+        private Node<E> current;
+
+        public SearchResult(Node<E> predecessor, Node<E> current) {
+            this.predecessor = predecessor;
+            this.current = current;
+        }
     }
 
     public BucketList() {
@@ -37,17 +51,26 @@ public class BucketList<E> {
         head.next = new AtomicMarkableReference<Node<E>>(new Node<E>(Integer.MAX_VALUE), false);
     }
 
+    public boolean contains(E item) {
+        int key = makeOrdinaryKey(item);
+        SearchResult searchResult = find(key);
+        return (searchResult.current.key == key);
+    }
+
+    private SearchResult find(int key) {
+        return null;    // todo
+    }
     // Creating keys for ordinary and sentinel nodex
     private int makeOrdinaryKey(E item) {
         // Take lowest three bytes so as to always have a positive value
-        int lowestThreeBytes = item.hashCode() & MASK;
-        int lowestThreeBytesWithMSBOn = lowestThreeBytes | HI_MASK;
+        int lowestThreeBytes = item.hashCode() & LOWEST_3_BYTES_MASK;
+        int lowestThreeBytesWithMSBOn = lowestThreeBytes | MSB_ON_MASK;
         return reverse(lowestThreeBytesWithMSBOn);
     }
 
     private int makeSentinelKey(E item) {
         // Take lowest three bytes so as to always have a positive value
-        int lowestThreeBytes = item.hashCode() & MASK;
+        int lowestThreeBytes = item.hashCode() & LOWEST_3_BYTES_MASK;
         return reverse(lowestThreeBytes);
     }
 }
