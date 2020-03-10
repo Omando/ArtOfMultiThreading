@@ -29,7 +29,15 @@ public class BucketList<E> {
         }
 
         private Node<E> getNext() {
-            return null;    // TODO
+            boolean[] cMarked = {false}; // is current marked?
+            boolean[] sMarked = {false}; // is successor marked?
+            Node<E> entry = this.next.get(cMarked);
+            while (cMarked[0]) {
+                Node<E> succ = entry.next.get(sMarked);
+                this.next.compareAndSet(entry, succ, true, sMarked[0]);
+                entry = this.next.get(cMarked);
+            }
+            return entry;
         }
     }
 
