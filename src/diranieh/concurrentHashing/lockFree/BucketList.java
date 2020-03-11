@@ -75,7 +75,7 @@ public class BucketList<E> {
 
         return new SearchResult<E>(predecessor, current);
     }
-    // Creating keys for ordinary and sentinel nodex
+    // Creating keys for ordinary and sentinel nodes
     private int makeOrdinaryKey(E item) {
         // Take lowest three bytes so as to always have a positive value
         int lowestThreeBytes = item.hashCode() & LOWEST_3_BYTES_MASK;
