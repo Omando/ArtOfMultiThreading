@@ -22,7 +22,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @param <E> the type of the elements in the list
  */
 public abstract class BaseHashSet<E> {
-    final int ENSURE_POSITIVIE_MASK = 0x7FFFFFFF;
+    final int CLEAR_MSB = 0x7FFFFFFF;
     // The underlying data structure is an array of lists
     protected List<E>[] table;
     protected AtomicInteger size;
@@ -108,7 +108,7 @@ public abstract class BaseHashSet<E> {
     protected abstract boolean shouldResize();
 
     protected int calculateHashCode(E item) {
-        return (item.hashCode() & ENSURE_POSITIVIE_MASK) % table.length;
+        return (item.hashCode() & CLEAR_MSB) % table.length;
     }
 
     protected List<E>[] createAndInitializeHashTable(int capacity) {
