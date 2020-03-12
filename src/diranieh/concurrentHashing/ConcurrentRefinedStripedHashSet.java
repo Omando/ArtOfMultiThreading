@@ -59,7 +59,7 @@ public class ConcurrentRefinedStripedHashSet<E> extends BaseHashSet<E> {
             ReentrantLock[] oldLocks = locks;
 
             // Acquire the lock for the given item
-            int lockIndex = Math.abs(item.hashCode() % oldLocks.length);
+            int lockIndex = (item.hashCode() & ENSURE_POSITIVIE_MASK) % oldLocks.length;
             ReentrantLock lock =  oldLocks[lockIndex];
             lock.lock();
             /* Bookmark2 */
@@ -78,7 +78,7 @@ public class ConcurrentRefinedStripedHashSet<E> extends BaseHashSet<E> {
 
     @Override
     protected void release(E item) {
-        int lockIndex = Math.abs(item.hashCode() % locks.length);
+        int lockIndex = (item.hashCode() & ENSURE_POSITIVIE_MASK) % locks.length;
         locks[lockIndex].unlock();
     }
 
