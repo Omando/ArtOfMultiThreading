@@ -4,7 +4,25 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
+/**
+ * Base class implemenation of close-addressing hash set
+ *
+ * Note regarding calculating hash codes:
+ * The mod operator returns a non-positive integer if its first argument is negative.
+ * This throws an out-of-bounds exception. One work around is to use Math.Abs(x) mod M
+ * but the absolute value function can even return a negative integer. This happens if
+ * its argument is Integer.MIN_VALUE because the resulting positive integer cannot be
+ * represented using a 32-bit two's complement integer.
+ *
+ * We therefore ensure the number is positive by ANDing with 0x7FFF FFFF: 0x7FFFFFFFF is
+ *     0111 1111 1111 1111 1111 1111 1111 1111
+ * all 1s except the sign bit.  This means:
+ *  hash & 0x7FFFFFFF gives a positive integer.
+ * (hash & 0x7FFFFFFF) mod (array.length - 1) gives a positive integer within array bounds
+ * @param <E> the type of the elements in the list
+ */
 public abstract class BaseHashSet<E> {
+    final int ENSURE_POSITIVIE_MASK = 0x7FFFFFFF;
     // The underlying data structure is an array of lists
     protected List<E>[] table;
     protected AtomicInteger size;
@@ -90,7 +108,7 @@ public abstract class BaseHashSet<E> {
     protected abstract boolean shouldResize();
 
     protected int calculateHashCode(E item) {
-        return Math.abs(item.hashCode() % table.length);
+        return (item.hashCode() & ENSURE_POSITIVIE_MASK) % table.length;
     }
 
     protected List<E>[] createAndInitializeHashTable(int capacity) {
