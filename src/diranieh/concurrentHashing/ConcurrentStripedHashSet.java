@@ -93,6 +93,6 @@ public class ConcurrentStripedHashSet<E> extends BaseHashSet<E> {
     }
 
     private int getLockIndex(E item) {
-        return Math.abs(item.hashCode() % locks.length);
+        return (item.hashCode() & CLEAR_MSB) % locks.length;
     }
 }
