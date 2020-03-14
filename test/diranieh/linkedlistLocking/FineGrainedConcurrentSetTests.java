@@ -1,5 +1,7 @@
 package diranieh.linkedlistLocking;
 
+import diranieh.utilities.Set;
+
 class FineGrainedConcurrentSetTests implements SequentialSetTests, ConcurrentSetTests {
     @Override
     public Set<String> createSet() {

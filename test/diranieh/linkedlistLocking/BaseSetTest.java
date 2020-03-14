@@ -1,5 +1,7 @@
 package diranieh.linkedlistLocking;
 
+import diranieh.utilities.Set;
+
 /**
  * Base interface for testing concurrent sets
  * This interface is extended by both ConcurrentSetTests and SequentialSetTests interfaces.

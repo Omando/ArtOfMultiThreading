@@ -9,6 +9,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  *
  * Note regarding calculating hash codes:
  * The mod operator returns a non-positive integer if its first argument is negative.
+ * This may happen if E's user-supplied hashCode() was not calculated correctly.
  * This throws an out-of-bounds exception. One work around is to use Math.Abs(x) mod M
  * but the absolute value function can even return a negative integer. This happens if
  * its argument is Integer.MIN_VALUE because the resulting positive integer cannot be

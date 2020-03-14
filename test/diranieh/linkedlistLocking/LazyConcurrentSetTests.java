@@ -1,5 +1,7 @@
 package diranieh.linkedlistLocking;
 
+import diranieh.utilities.Set;
+
 class LazyConcurrentSetTests implements SequentialSetTests, ConcurrentSetTests {
 
     @Override

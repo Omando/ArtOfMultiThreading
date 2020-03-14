@@ -1,5 +1,7 @@
 package diranieh.linkedlistLocking;
 
+import diranieh.utilities.Set;
+
 /**
  * A linked list implementation of an ordered set of keys. The keys are assumed to
  * have minimum and maximum values.

@@ -1,5 +1,7 @@
 package diranieh.linkedlistLocking;
 
+import diranieh.utilities.Set;
+
 /**
  *  A concurrent linked list implementation of a set with coarse-grained
  *  synchronization. SimplerLinkedListSet is used as the underlying Set

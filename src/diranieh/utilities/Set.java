@@ -1,4 +1,4 @@
-package diranieh.linkedlistLocking;
+package diranieh.utilities;
 
 public interface Set<E> {
     boolean add(E item);
