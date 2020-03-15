@@ -1,0 +1,21 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Scenario: ClosedAddress hashset should add and remove" type="CucumberJavaRunConfigurationType" factoryName="Cucumber java">
+    <option name="CUCUMBER_CORE_VERSION" value="5" />
+    <option name="FILE_PATH" value="$PROJECT_DIR$/test/diranieh/concurrentHashing/ClosedAddressConcurrentHashSet.feature" />
+    <option name="GLUE" value="diranieh.concurrentHashing" />
+    <option name="MAIN_CLASS_NAME" value="io.cucumber.core.cli.Main" />
+    <module name="ArtOfMultiThreading" />
+    <option name="NAME_FILTER" value="^hash set should add and remove$" />
+    <option name="PROGRAM_PARAMETERS" value=" --plugin org.jetbrains.plugins.cucumber.java.run.CucumberJvm5SMFormatter --name &quot;^hashset should add and remove$&quot;" />
+    <option name="SUGGESTED_NAME" value="Scenario: hash set should add and remove" />
+    <extension name="coverage">
+      <pattern>
+        <option name="PATTERN" value="io.cucumber.core.cli.*" />
+        <option name="ENABLED" value="true" />
+      </pattern>
+    </extension>
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>

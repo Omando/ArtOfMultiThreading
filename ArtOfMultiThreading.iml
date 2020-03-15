@@ -10,7 +10,8 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" scope="TEST" name="org.junit.jupiter:junit-jupiter:5.5.2" level="application" />
+    <orderEntry type="library" scope="TEST" name="io.cucumber:cucumber-junit:5.4.0" level="application" />
     <orderEntry type="library" scope="TEST" name="io.cucumber:cucumber-java8:5.4.0" level="application" />
-    <orderEntry type="library" name="io.cucumber:cucumber-junit:5.4.0" level="application" />
+    <orderEntry type="library" name="io.cucumber:cucumber-expressions:5.0.19" level="application" />
   </component>
 </module>
