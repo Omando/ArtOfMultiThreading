@@ -9,8 +9,8 @@ import java.util.concurrent.CountDownLatch;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class stepDefinitions implements En {
-    private final HashSetFactory<Integer> factory = new HashSetFactory<Integer>();
+public class ClosedAddressStepDefinitions implements En {
+    //private final HashSetFactory<Integer> factory = new HashSetFactory<Integer>();
     private Integer capacity;
     private Integer threshold;
     private Integer itemsPerThread;
@@ -19,7 +19,7 @@ public class stepDefinitions implements En {
     private BaseHashSet<Integer> hashSet;
 
 
-    public stepDefinitions() {
+    public ClosedAddressStepDefinitions() {
         Given("capacity is {int} and bucket threshold is {int}",
                 (Integer capacity, Integer threshold) -> {
             this.capacity = capacity;
@@ -29,12 +29,14 @@ public class stepDefinitions implements En {
         Given("implementation is {string}", (String implementationName) -> {
             switch (implementationName) {
                 case "Coarse":
-                    hashSet = factory.getCoarse(capacity, threshold);
+                    hashSet = HashSetFactory.getCloseAddressCoarse(capacity, threshold);
                     break;
                 case "Striped":
-                    hashSet = factory.getStriped(capacity, threshold);
+                    hashSet = HashSetFactory.getCloseAddressStriped(capacity, threshold);
+                    break;
                 case "Refined":
-                    hashSet = factory.getRefined(capacity, threshold);
+                    hashSet = HashSetFactory.getCloseAddressRefined(capacity, threshold);
+                    break;
             }
         });
 
