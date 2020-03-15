@@ -5,21 +5,23 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * Base class implemenation of close-addressing hash set
+ * Base class implementation of close-addressing hash set
  *
  * Note regarding calculating hash codes:
- * The mod operator returns a non-positive integer if its first argument is negative.
- * This may happen if E's user-supplied hashCode() was not calculated correctly.
- * This throws an out-of-bounds exception. One work around is to use Math.Abs(x) mod M
- * but the absolute value function can even return a negative integer. This happens if
- * its argument is Integer.MIN_VALUE because the resulting positive integer cannot be
- * represented using a 32-bit two's complement integer.
+ * The mod operator returns a non-positive integer if its first argument is negative;
+ * this may happen if E's user-supplied hashCode() was not guaranteed to always return
+ * a positive value. The result of the mod operator in this case throws an out-of-bounds
+ * exception. One work around is to use Math.Abs(x) mod M, but the absolute value function
+ * can even return a negative integer (1 in 4 Billion!). This happens if its argument is
+ * Integer.MIN_VALUE because the resulting positive integer cannot be represented using a
+ * 32-bit two's complement integer.
  *
- * We therefore ensure the number is positive by ANDing with 0x7FFF FFFF: 0x7FFFFFFFF is
- *     0111 1111 1111 1111 1111 1111 1111 1111
- * all 1s except the sign bit.  This means:
- *  hash & 0x7FFFFFFF gives a positive integer.
- * (hash & 0x7FFFFFFF) mod (array.length - 1) gives a positive integer within array bounds
+ * We therefore ensure the hash code is always positive by ANDing it with 0x7FFF FFFF.
+ * 0x7FFF FFFF in binary is 0111 1111 1111 1111 1111 1111 1111 1111 (all 1s except the sign
+ * bit). This means:
+ *      hash & 0x7FFFFFFF gives a positive integer.
+ *      (hash & 0x7FFFFFFF) mod (array.length - 1) gives a positive integer within array bounds
+ *
  * @param <E> the type of the elements in the list
  */
 public abstract class BaseHashSet<E> {

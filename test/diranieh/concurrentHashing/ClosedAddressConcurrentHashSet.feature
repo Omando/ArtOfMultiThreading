@@ -1,9 +1,10 @@
-Feature: Concurrent hash set
+Feature: Closed Address Concurrent hash set
 
+  # bucket threshold is the average number of items in each bucket
   Scenario Outline: hashset should add and remove
-    Given capacity is 5 and bucket threshold is 2
-    And implementation is <implementation>
-    When I add the following items
+  Given capacity is 5 and bucket threshold is 2
+  And implementation is <implementation>
+  When I add the following items
       |1|
       |2|
       |3|
@@ -22,6 +23,7 @@ Feature: Concurrent hash set
     |"Striped"       |
     |"Refined"       |
 
+    # bucket threshold is the average number of items in each bucket
   Scenario Outline: hashset should increase capacity
     Given capacity is 5 and bucket threshold is 2
     And implementation is <implementation>
@@ -33,6 +35,7 @@ Feature: Concurrent hash set
       |"Striped"        |
       |"Refined"        |
 
+    # bucket threshold is the average number of items in each bucket
   Scenario Outline: hashset concurrent access
     Given capacity is 5 and bucket threshold is 10
     And implementation is <implementation>
