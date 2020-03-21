@@ -9,7 +9,7 @@ import java.util.concurrent.locks.ReentrantLock;
 public class CoarseCuckooHashSet<E>  implements Set<E> {
     final static int CLEAR_MSB = 0x7FFFFFFF;
     final static int ADD_RETRY_LIMIT = 32;
-    private final Lock lock;
+    private final Lock lock;        // coarse-grained re-entrant lock
     private final E[][] tables;     // an array of tables. Initialized in ctor to array of 2 tables.
     private final int _prime;       // Used in MAD hashing. See ctor
     private final int _shift;       // "
