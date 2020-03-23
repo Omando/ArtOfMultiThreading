@@ -1,6 +1,8 @@
 package diranieh.concurrentHashing;
 
+import diranieh.concurrentHashing.openaddress.CoarseCuckooHashSet;
 import diranieh.concurrentHashing.openaddress.CuckooHashSet;
+import diranieh.utilities.Set;
 
 public class HashSetFactory<E> {
     public static <E> BaseHashSet<E> getCloseAddressCoarse(int capacity, int threshold) {
@@ -15,7 +17,11 @@ public class HashSetFactory<E> {
         return new ConcurrentRefinedStripedHashSet<E>(capacity, threshold);
     }
 
-    public static <E>CuckooHashSet<E> getOpenAddressNonThreadSafeCuckoo(int capacity) {
+    public static <E> Set<E> getOpenAddressNonThreadSafeCuckoo(int capacity) {
         return new CuckooHashSet<E>(capacity);
+    }
+
+    public static <E> Set<E> getOpenAddressCoarseCuckoo(int capacity) {
+        return new CoarseCuckooHashSet<E>(capacity);
     }
 }
