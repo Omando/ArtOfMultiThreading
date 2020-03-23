@@ -50,17 +50,17 @@ Feature: Closed Address Concurrent hash set
       |2            |2          |4               |"Coarse"         |
       |4            |2          |8               |"Coarse"         |
       |8            |8          |64              |"Coarse"         |
-      |10            |10        |100             |"Coarse"         |
+      |10           |10         |100             |"Coarse"         |
       |1            |3          |3               |"Striped"        |
       |2            |2          |4               |"Striped"        |
       |4            |2          |8               |"Striped"        |
       |8            |8          |64              |"Striped"        |
-      |10            |10        |100             |"Striped"        |
+      |10           |10         |100             |"Striped"        |
       |1            |3          |3               |"Refined"        |
       |2            |2          |4               |"Refined"        |
       |4            |2          |8               |"Refined"        |
       |8            |8          |64              |"Refined"        |
-      |10            |10        |100             |"Refined"        |
+      |10           |10         |100             |"Refined"        |
 
 
     # Add other scenarios for removing ...

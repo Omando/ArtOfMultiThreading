@@ -18,7 +18,6 @@ public class ClosedAddressStepDefinitions implements En {
     private boolean[] items;
     private BaseHashSet<Integer> hashSet;
 
-
     public ClosedAddressStepDefinitions() {
         Given("capacity is {int} and bucket threshold is {int}",
                 (Integer capacity, Integer threshold) -> {
