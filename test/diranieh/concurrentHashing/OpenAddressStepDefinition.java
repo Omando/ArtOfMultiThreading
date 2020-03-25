@@ -5,12 +5,19 @@ import io.cucumber.java8.En;
 import org.junit.Assert;
 
 import java.util.Arrays;
+import java.util.concurrent.CountDownLatch;
 import java.util.function.Predicate;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class OpenAddressStepDefinition implements En {
     private int capacity;
     private int itemCount;
     private Set<Integer> hashSet;
+    private Integer itemsPerThread;
+    private Integer threadCount;
+    private boolean[] items;
+    private int size;
 
     public OpenAddressStepDefinition() {
 
@@ -30,7 +37,8 @@ public class OpenAddressStepDefinition implements En {
                 case "ThreadUnSafe":
                     hashSet = HashSetFactory.getOpenAddressNonThreadSafeCuckoo(capacity);
                     break;
-                    // Add others
+                case "Coarse":
+                    hashSet = HashSetFactory.getOpenAddressCoarseCuckoo(capacity);
             }
         });
 
@@ -73,6 +81,68 @@ public class OpenAddressStepDefinition implements En {
 
         Then("hash set should be empty", () -> {
             Assert.assertTrue(hashSet.isEmpty());
+        });
+
+        And("I create {int} threads", (Integer threadCount) -> {
+            this.threadCount = threadCount;
+        });
+        And("Each of my threads adds {int} new items", (Integer itemsPerThread) -> {
+            this.itemsPerThread = itemsPerThread;
+        });
+        When("all my threads add items", () -> {
+            final CountDownLatch latch = new CountDownLatch(1);
+            Thread[] threads = new Thread[this.threadCount];
+            items = new boolean[this.threadCount * this.itemsPerThread];
+
+            // Create required number of threads with each thread counting
+            // {countsPerThread} times
+            for (int i = 0; i < this.threadCount; i++) {
+                int threadIndex = i;
+                threads[i] = new Thread( () -> {
+                    // Wait for signal from main test thread so that all
+                    // threads count concurrently
+                    try {
+                        latch.await();
+                        int startingValue = (threadIndex * this.itemsPerThread);
+                        for (int j = 0; j < this.itemsPerThread; j++) {
+                            int valueToAdd = startingValue + j;
+                            boolean added = hashSet.add(valueToAdd);
+                            if (!added)
+                                fail("duplicate item: " + valueToAdd);
+                            else {
+                                items[valueToAdd] = true;
+                            }
+                        }
+                    } catch (InterruptedException exception) {
+                        System.out.println("Error counting due to interruption: " + exception.getMessage());
+                        Thread.currentThread().interrupt();     // restore interrupt status
+                    }
+                    catch (Exception exception) {
+                        System.out.println("Exception adding: " + exception.getMessage());
+                    }
+                });
+                threads[i].start();
+            }
+
+            // Start popping concurrently
+            latch.countDown();
+
+            // Wait for all threads to finish
+            for (int i = 0; i < this.threadCount; i ++) {
+                threads[i].join();
+            }
+            System.out.println("All threads completed...");
+
+        });
+        Then("total hashset item count is {int}", (Integer totalItemCunt) -> {
+            assertEquals(totalItemCunt, size);
+        });
+        And("all items from all threads are added", () -> {
+            // should have added all items from all threads
+            for (int i = 0; i < (this.threadCount * this.itemsPerThread); i++) {
+                assertTrue(items[i], "Missing value " + i);
+                size++;
+            }
         });
     }
 }
