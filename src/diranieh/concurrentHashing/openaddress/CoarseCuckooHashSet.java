@@ -9,7 +9,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 public class CoarseCuckooHashSet<E>  implements Set<E> {
     final static int CLEAR_MSB = 0x7FFFFFFF;
-    final static int ADD_RETRY_LIMIT = 32;
+    final static int ADD_RETRY_LIMIT = 16;
     private final Lock lock;
     private final E[][] tables;      // an array of tables. Initialized in ctor to array of 2 tables.
     private final int _prime;       // Used in MAD hashing. See ctor
@@ -62,8 +62,10 @@ public class CoarseCuckooHashSet<E>  implements Set<E> {
 
     private boolean add(E item, int tableIndex, E originalItem, int iterationCount) {
         // Resize the tables if we have reached a pre-determined iteration count
-        if (iterationCount == ADD_RETRY_LIMIT)
+        if (iterationCount == ADD_RETRY_LIMIT) {
+            iterationCount = 0;
             resize();
+        }
 
         // Determine hash code of given item and determine if it exists in the given table
         int newItemHashCode =( tableIndex == 0)? hash1(item) : hash2(item);
