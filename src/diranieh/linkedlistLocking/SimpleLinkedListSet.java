@@ -10,8 +10,8 @@ import diranieh.utilities.Set;
  *  is absent.
  *
  *  This class does not use a sentinel for the head. Compare the code in this class
- *  to SimpleLinkedListSet2 which uses a sentinel for the head. The code in
- *  SimpleLinkedListSet2<E> is much more compact than the code in this class
+ *  to SimplerLinkedListSet which uses a sentinel for the head. The code in
+ *  SimplerLinkedListSet<E> is much more compact than the code in this class
  *
  *  This class is not used any further
  */
