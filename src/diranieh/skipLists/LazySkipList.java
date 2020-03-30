@@ -18,14 +18,14 @@ public class LazySkipList<E> {
         public Node(int key) {
             this.key = key;
             item = null;
-            next = new Node[MAX_LEVEL+1];
+            next = (Node<E>[])new Node[MAX_LEVEL+1];
             topLevel = MAX_LEVEL;
         }
 
         public Node(E item, int height) {
             key = item.hashCode();
             this.item = item;
-            next = new Node[height];
+            next = (Node<E>[])new Node[height];
             topLevel = height;
         }
 
