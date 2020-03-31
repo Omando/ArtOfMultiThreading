@@ -50,7 +50,6 @@ public class SkipListSet<E extends Comparable<E>> {
     }
 
     public boolean add(E item) {
-        // to be done....
         return false;
     }
 
