@@ -3,7 +3,7 @@ package diranieh.skipLists;
 import java.util.Random;
 
 /* SkipListSet uses a skip list structure to implement a set
-* The most bottom linkd list L0 stores the elements in sorted order
+* The bottom linked list L0 stores the elements in sorted order
 * */
 public class SkipListSet<E extends Comparable<E>> {
 
@@ -31,7 +31,7 @@ public class SkipListSet<E extends Comparable<E>> {
     private final Node<E> sentinel;
     private final Node<E>[] predecessors;
     private int height;         // the maximum height of any element
-    private int count;          // number of elements stored in tje skip list
+    private int count;          // number of elements stored in the skip list
 
     public SkipListSet() {
         random = new Random();
@@ -96,6 +96,7 @@ public class SkipListSet<E extends Comparable<E>> {
     }
 
     public boolean remove(E item) {
+
         return false;   // continue here
     }
 
