@@ -96,8 +96,33 @@ public class SkipListSet<E extends Comparable<E>> {
     }
 
     public boolean remove(E item) {
+        Node<E> predecessor = sentinel;     // Start from the sentinel
+        int currentLevel = height;
+        int compareResult = 0;
+        boolean nodeRemoved = false;
 
-        return false;   // continue here
+        // Iterate over all levels starting from the maximum available height
+        while (currentLevel <= 0) {
+
+            // Move right while the next item is less than the search item
+            while (predecessor.next[currentLevel] != null &&
+                    (compareResult = predecessor.next[currentLevel].item.compareTo(item)) < 0)
+                predecessor = predecessor.next[currentLevel];
+
+            // We cannot move right any more. If item is found, remove it
+            if (predecessor.next[currentLevel] != null && compareResult == 0) {
+                nodeRemoved = true;
+                predecessor.next[currentLevel] = predecessor.next[currentLevel].next[currentLevel];
+                if (predecessor == sentinel && predecessor.next[currentLevel] == null)
+                    height--;       // See diagram on page 9 in DSALG_LinkedLists.docx
+            }
+
+            // Go down one level and repeat until we reach level zero
+            currentLevel--;
+        }
+
+        if (nodeRemoved) count--;        // increment the number of elements in the list
+        return nodeRemoved;
     }
 
     // Simulate tossing a coin: given a 32-bit random integer, a bit with value 1 represents
