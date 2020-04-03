@@ -83,7 +83,7 @@ public class SkipListSet<E extends Comparable<E>> {
         int newNodeHeight = getNewNodeHeight();
         Node<E> newNode = new Node<>(item, newNodeHeight);
 
-        // If new item's height is > the current maximum height, the add additional
+        // If new item's height is > the current maximum height, then add additional
         // entries that point to the sentinel (see figure in document for adding 3.5)
         while (height < newNode.height())
             predecessors[++height] = sentinel;      // Increase height
@@ -91,7 +91,7 @@ public class SkipListSet<E extends Comparable<E>> {
         // see DSALG_LinkedList document -> adding 3.5, page 8 & 9
         for (int i = 0; i < newNode.next.length; i++) {
             newNode.next[i] = predecessors[i].next[i];      // adding 3.5, top figure
-            predecessors[i].next[i] = newNode.next[i];      // adding 3.5, bottom figure
+            predecessors[i].next[i] = newNode;      // adding 3.5, bottom figure
         }
 
         count++;        // increment the number of elements in the list
