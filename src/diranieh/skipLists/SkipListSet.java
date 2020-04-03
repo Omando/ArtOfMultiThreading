@@ -18,7 +18,9 @@ public class SkipListSet<E extends Comparable<E>> {
 
         public Node(E item, int height) {
             this.item = item;
-            next = (Node<E>[])new Node[height]; // think of next as a vertical array
+
+            // If height is 1, then the array should have 2 elements
+            next = (Node<E>[])new Node[height+1]; // think of next as a vertical array
         }
 
         int height() {
@@ -43,12 +45,13 @@ public class SkipListSet<E extends Comparable<E>> {
 
     // Each step (right or down) takes a constant time. The expected running time
     // is therefore O(Log n)
-    public E find(E item) {
+    public boolean contains(E item) {
         // Get the predecessor node starting from the top level sentinel
         Node<E> predecessor = findPredecessorNode(item);
 
         // Did we find the item?
-        return predecessor.next[0] == null? null : predecessor.next[0].item;
+        //return predecessor.next[0] == null? null : predecessor.next[0].item;
+        return predecessor.next[0].item == item;
     }
 
     // Search for item and then splice the item into a few lists Lo...Lk where k is
@@ -59,7 +62,7 @@ public class SkipListSet<E extends Comparable<E>> {
         int compareResult = 0;
 
         // Iterate over all levels starting from the maximum available height
-        while (currentLevel <= 0) {
+        while (currentLevel >= 0) {
 
             // Move right while the next item is less than the search item
             while (predecessor.next[currentLevel] != null &&
@@ -102,7 +105,7 @@ public class SkipListSet<E extends Comparable<E>> {
         boolean nodeRemoved = false;
 
         // Iterate over all levels starting from the maximum available height
-        while (currentLevel <= 0) {
+        while (currentLevel >= 0) {
 
             // Move right while the next item is less than the search item
             while (predecessor.next[currentLevel] != null &&
@@ -123,6 +126,10 @@ public class SkipListSet<E extends Comparable<E>> {
 
         if (nodeRemoved) count--;        // increment the number of elements in the list
         return nodeRemoved;
+    }
+
+    public int count() {
+        return count;
     }
 
     // Simulate tossing a coin: given a 32-bit random integer, a bit with value 1 represents
@@ -152,7 +159,7 @@ public class SkipListSet<E extends Comparable<E>> {
         int currentLevel = height;
 
         // Loop until we reach Level 0
-        while (currentLevel <= 0) {
+        while (currentLevel >= 0) {
 
             // Move right while the next item is less than the search item
             while (predecessor.next[currentLevel] != null &&
