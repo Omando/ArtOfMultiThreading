@@ -18,6 +18,9 @@ public class NonBlockingConcurrentSet<E> implements Set<E> {
     // field names next does not belong to the next node, but to this node
     private static class Node<E> {
         private final E item;
+
+        // The hashCode field is the item’s hash code. Nodes are sorted in hashcode order,
+        // providing an efficient way to detect when an item is absent.
         private final int hashCode;
         private AtomicMarkableReference<Node<E>> next;
 

@@ -22,8 +22,10 @@ import java.util.concurrent.locks.ReentrantLock;
 public class OptimisticConcurrentSet<E> implements Set<E> {
 
     private static class Node<E> {
-
         private final E item;
+
+        // The hashCode field is the item’s hash code. Nodes are sorted in hashcode order,
+        // providing an efficient way to detect when an item is absent.
         private final int hashCode;
         private Node<E> next;
         private final ReentrantLock locker = new ReentrantLock();
