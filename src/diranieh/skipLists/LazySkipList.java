@@ -1,29 +1,42 @@
 package diranieh.skipLists;
 
+import java.util.Random;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+/* A concurrent implementation of a skip list based on LazyConcurrentSet
+
+ This highest level can be maintained dynamically to reflect the highest level
+ actually in the SkipList. This was done in SkipListSet, but for brevity, we do
+ not do so here and searches always start at the max level
+* */
 public class LazySkipList<E> {
     // Define structure of each node
     private static final class Node<E> {
-        private final Lock lock = new ReentrantLock();
-        final E item;
-        final int key;
-        final Node<E>[] next;       // an array!
-        volatile boolean marked = false;
-        volatile boolean fullyLinked = false;
+        /* item, hashCode and next field are the core fields of a Node class */
+        private final E item;
+
+        // The hashCode field is the item’s hash code. Nodes are sorted in hashcode order,
+        // providing an efficient way to detect when an item is absent.
+        private final int hashCode;
+        private final Node<E>[] next;       // an array!
         private int topLevel;
 
+        /* locked, marked and fullyLinked fields are used for concurrency control*/
+        private final Lock lock = new ReentrantLock();
+        private volatile boolean marked = false;        // true if the node was logically deleted, else false
+        private volatile boolean fullyLinked = false;   // true if the node was linked in lists at all levels.
+
         // Sentinel node constructor
-        public Node(int key) {
-            this.key = key;
+        public Node(int hashCode) {
+            this.hashCode = hashCode;
             item = null;
             next = (Node<E>[])new Node[MAX_LEVEL+1];
             topLevel = MAX_LEVEL;
         }
 
         public Node(E item, int height) {
-            key = item.hashCode();
+            hashCode = item.hashCode();
             this.item = item;
             next = (Node<E>[])new Node[height];
             topLevel = height;
@@ -38,11 +51,10 @@ public class LazySkipList<E> {
         }
     }
 
-    private static final int MAX_LEVEL = 10;
-
-    // Sentinel nodes
-    final Node<E> head = new Node<>(Integer.MIN_VALUE);
-    final Node<E> tail = new Node<>(Integer.MAX_VALUE);
+    private static final int MAX_LEVEL = 32;
+    private final Node<E> head = new Node<>(Integer.MIN_VALUE);     // Sentinel node
+    private final Node<E> tail = new Node<>(Integer.MAX_VALUE);     // Sentinel node
+    private final Random random;
 
     public LazySkipList() {
         // Create an empty skip list: All head.next references point to tail
@@ -50,13 +62,94 @@ public class LazySkipList<E> {
         // is an array and each array element must point to tail
         for (int i = 0; i < head.next.length; i++)
             head.next[i] = tail;
+
+        random = new Random();
     }
 
-    // Returns -1 if the item is not found, otherwise returns the level
-    // at which the item was found. The find() method returns the preds[] and succs[]
+    // Uses find method determine whether a node with the target hash code is
+    // already in the list. If an unmarked node with the hashcode is found, we
+    // just return false (cannot add an existing item as a set is mathematically
+    // unique). However, if that node is not yet fully linked (indicated by the
+    // fullyLinked field), then the thread waits until it it linked, because the
+    // key (hashcode) is not in the abstract set until the node is fully linked
+    boolean add(E item) {
+        int topLevel = getNewNodeHeight();
+        Node<E>[] preds = (Node<E>[]) new Node[MAX_LEVEL + 1];
+        Node<E>[] succs = (Node<E>[]) new Node[MAX_LEVEL + 1];
+
+        while (true) {
+            // Try to find the given item
+            int foundAtLevel = find(item, preds, succs);
+            if (foundAtLevel != -1) {
+                // Item found. Get the actual node
+                Node<E> nodeFound = preds[foundAtLevel];
+
+                // Given item found, but the item is in the set if that node is both unmarked
+                // AND fully linked. It is safe to check if the node is unmarked before the
+                // node is fully linked, because remove() methods do not mark nodes unless
+                // they are fully linked
+                if (!nodeFound.marked) {
+                    // Found item was not marked for deletion. If it's not fully linked, wait
+                    // for it to be fully linked before returning false (item is in list if
+                    // and only if it is both marked AND fully linked
+                    while (!nodeFound.fullyLinked) {/* Empty */}
+                    return false;       // item marked and fully linked. We can return false
+                }
+
+                // The node found is actually marked;  some other thread is in the process of
+                // deleting it, so the add() call simply retries.
+                continue;
+            }
+
+            // Item not found in the list. preds and succs references are unreliable, because
+            // they may no longer be accurate by the time the nodes are accessed. Proceed to
+            // lock and validate each of the predecessors returned by find() from level 0 up
+            // to the topLevel of the new node
+            int highestLocked = -1;
+            try {
+                Node<E> pred, succ;
+                boolean valid = true;
+                for (int level = 0; valid && (level <= topLevel); level++) {
+                    pred = preds[level];
+                    succ = succs[level];
+                    pred.lock.lock();
+                    highestLocked = level;
+
+                    // Check that the predecessor is still adjacent to the successor and that neither
+                    // is marked.
+                    valid = !pred.marked && !succ.marked && pred.next[level] == succ;
+                }
+
+                // If validation fails, release the locks an retry again (see finally block)
+                if (!valid) continue;
+
+                // If the thread successfully locks and validates the results of find up to the
+                // topLevel of the new node, then the add() call will succeed because the thread
+                // holds all the locks it needs. The thread then allocates a new node with the
+                // appropriate key and randomly chosen topLevel, links it in, and sets the new
+                // node’s fullyLinked flag. It then releases all its locks and returns true.
+                Node<E> newNode = new Node(item, topLevel);
+                for (int level = 0; level <= topLevel; level++)
+                    newNode.next[level] = succs[level];
+                for (int level = 0; level <= topLevel; level++)
+                    preds[level].next[level] = newNode;
+                newNode.fullyLinked = true; // successful add linearization point
+                return true;
+
+            } finally {
+                // If validation fails, the thread must have encountered the effects of a
+                // conflicting method, so it releases the locks it acquired and retries.
+                for (int level = 0; level <= highestLocked; level++)
+                    preds[level].unlock();
+            }
+        }
+    }
+
+    // Returns -1 if the item is not found, otherwise returns the level at which
+    // the item was found. The find() method returns the preds[] and succs[]
     // arrays as well as the level at which the node with a matching key was found.
-    int find(E item, Node<E>[] predecessors, Node<E>[] successors) {
-        int key = item.hashCode();
+    private int find(E item, Node<E>[] predecessors, Node<E>[] successors) {
+        int hashCode = item.hashCode();
         int lFound = -1;
 
         // Traverse the SkipList starting at the head and at the highest level
@@ -65,14 +158,14 @@ public class LazySkipList<E> {
             Node<E> current = predecessor.next[level];
 
             // Move right while key to find is greater than the current node's key
-            while (key >= current.key) {
+            while (hashCode >= current.hashCode) {
                 predecessor = current;
                 current = predecessor.next[level];
             }
 
             // We cannot move right any more. Record the level if we find a node
             // with a matching key
-            if (lFound == -1 && key == current.key)
+            if (lFound == -1 && hashCode == current.hashCode)
                 lFound = level;
 
             // Record the predecessor and current nodes for this level
@@ -84,16 +177,25 @@ public class LazySkipList<E> {
         return lFound;
     }
 
-    // Uses find method determine whether a node with the target key k is
-    // already in the list
-    boolean add(E item) {
-        int key = item.hashCode();
+    // Simulate tossing a coin: given a 32-bit random integer, a bit with value 1 represents
+    // heads and a bit with value 0 represents tails. To simulate getting a tails from tossing
+    // a coin, get a 32-bit random integer and count the number of trailing 1s (heads) in the
+    // number's binary representation. The first 0 in the binary representation of the random
+    // number represents a tails, and the location of that first 0 is the height.
+    // Note Maximum height returned is 32 since the random number is a 32-bit integer
+    private int getNewNodeHeight() {
+        int height = 0;     // Initial height is 0
+        int nthBit = 1;     // Start at bit 1
+        int randomNumber = random.nextInt();
 
-        // Nothing to do if an unmarked node with the same key is found (e.g., key
-        // is already in the list)
+        // Repeat while the nth bit of randomNumber is 1 (heads)
+        while ((randomNumber & nthBit) != 0) {
+            height++;           // Increment height
+            nthBit <<= 1;       // Left shift m by one 1 to move to the next more significant bit
+        }
 
-
-        return false;
+        // The nth bit of randomNumber is 0 (tails). The location of the nth bit
+        // is the required height
+        return height;
     }
-
 }
