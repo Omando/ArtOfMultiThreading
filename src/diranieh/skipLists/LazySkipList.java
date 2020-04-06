@@ -145,6 +145,98 @@ public class LazySkipList<E> {
         }
     }
 
+    boolean remove(E item) {
+        Node<E> nodeToRemove = null; boolean isMarked = false; int topLevel = -1;
+        Node<E>[] preds = (Node<E>[]) new Node[MAX_LEVEL + 1];
+        Node<E>[] succs = (Node<E>[]) new Node[MAX_LEVEL + 1];
+
+        // Keep on trying until we succeed
+        while (true) {
+            // Try to find the given item
+            int foundAtLevel = find(item, preds, succs);
+
+            // We found a level where a node with the same item exists. Get the node
+            // from that level
+            if (foundAtLevel != -1) nodeToRemove = succs[foundAtLevel];
+
+            // Is the node ready to be deleted? A node is ready to be deleted if  it is
+            // fully linked, unmarked, and at its top level. A node found below its top
+            // level was either not yet fully linked or marked and already partially
+            // unlinked by a concurrent remove() method call
+            if (isMarked || (foundAtLevel != -1 &&
+                            nodeToRemove.fullyLinked &&
+                            nodeToRemove.topLevel == foundAtLevel &&
+                            !nodeToRemove.marked)) {
+
+                // Verify that the node is still not marked. If it is still not marked,
+                // the thread locks the node and marks it (indicating the node is
+                // logically deleted)
+                if (!isMarked) {
+                    topLevel = nodeToRemove.topLevel;
+                    nodeToRemove.lock.lock();
+
+                    // If the node was marked, then the thread returns false since the node
+                    // was already deleted.
+                    if (nodeToRemove.marked) {
+                        nodeToRemove.lock.unlock();
+                        return false;
+                    }
+                    nodeToRemove.marked = true;
+                    isMarked = true;
+                }
+
+                // The rest of the code completes the physical deletion of the nodeToRemove node
+                int highestLocked = -1;
+                try {
+                    // To remove nodeToRemove from the list, first lock (in ascending order,
+                    // to avoid deadlock) the nodeToRemove’s predecessors at all levels up to
+                    // the nodeToRemove’s topLevel
+                    Node<E> pred, succ; boolean valid = true;
+                    for (int level = 0; valid && (level <= topLevel); level++) {
+                        pred = preds[level];
+                        pred.lock.lock();
+                        highestLocked = level;
+
+                        // Validate that the predecessor is still unmarked and still refers
+                        // to nodetoRemove.
+                        valid = !pred.marked && pred.next[level] == nodeToRemove;
+                    }
+                    if (!valid) continue;
+
+                    // Splice out nodetoRemove one level at a time. To maintain the SkipList
+                    // property, that any node reachable at a given level is reachable at
+                    // lower levels, the victim is spliced out from top to bottom.
+                    for (int level = topLevel; level >= 0; level--) {
+                        preds[level].next[level] = nodeToRemove.next[level];
+                    }
+
+                    // After successfully removing the node, the thread releases all its locks
+                    // and returns true
+                    nodeToRemove.lock.unlock();
+                    return true;
+                } finally {
+                    for (int i = 0; i <= highestLocked; i++) {
+                        preds[i].unlock();
+                    }
+                }
+            } else return false;
+        }
+    }
+
+    // The contains method is usually the most common and is wait-free
+    boolean contains(E item) {
+        Node<E>[] preds = (Node<E>[]) new Node[MAX_LEVEL + 1];
+        Node<E>[] succs = (Node<E>[]) new Node[MAX_LEVEL + 1];
+
+        // Locate the node
+        int foundAtLevel = find(item, preds, succs);
+
+        // A node is found if it is fully linked and unmarked for deletion
+        return (foundAtLevel != -1
+                && succs[foundAtLevel].fullyLinked
+                && !succs[foundAtLevel].marked);
+    }
+
     // Returns -1 if the item is not found, otherwise returns the level at which
     // the item was found. The find() method returns the preds[] and succs[]
     // arrays as well as the level at which the node with a matching key was found.
