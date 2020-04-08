@@ -2,6 +2,7 @@ package diranieh.priorityQueues;
 
 import diranieh.concurrentStacks.ConcurrentLockFreeStack;
 
+/* Array based priority queue */
 public class ArrayBasedBoundedPriorityQueue<E> implements PriorityQueue<E> {
     private final int range;
     private final ConcurrentLockFreeStack<E>[] pool;
