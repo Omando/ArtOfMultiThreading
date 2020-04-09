@@ -2,13 +2,13 @@ package diranieh.priorityQueues;
 
 import diranieh.concurrentStacks.ConcurrentLockFreeStack;
 
-/* Array based priority queue */
+/* Array-based, thread-safe bounded priority queue */
 public class ArrayBasedBoundedPriorityQueue<E> implements PriorityQueue<E> {
-    private final int range;
+    private final int priorityRange;
     private final ConcurrentLockFreeStack<E>[] pool;
 
     public ArrayBasedBoundedPriorityQueue(int range) {
-        this.range = range;
+        this.priorityRange = range;
         this.pool =  (ConcurrentLockFreeStack<E>[]) new ConcurrentLockFreeStack[range];
 
         for (int i = 0; i < range; i++)
@@ -17,12 +17,19 @@ public class ArrayBasedBoundedPriorityQueue<E> implements PriorityQueue<E> {
 
     @Override
     public void add(E item, int priority) {
-        // todo
+        if (priority >= priorityRange)
+            throw new IllegalArgumentException(String.format("priority must be less than %d", priorityRange));
+
+        pool[priority].push(item);
     }
 
     @Override
     public E removeMin() {
-        // todo
+        for (int i = 0; i < priorityRange; i++) {
+            E item = pool[i].pop();
+            if (item != null)
+                return item;
+        }
         return null;
     }
 }
