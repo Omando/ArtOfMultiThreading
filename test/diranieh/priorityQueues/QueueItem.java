@@ -1,8 +1,8 @@
 package diranieh.priorityQueues;
 
 public class QueueItem {
-    private  String item;
-    private  int priority;
+    private String item;
+    private int priority;
 
     public QueueItem(String item, int priority) {
         this.item = item;
