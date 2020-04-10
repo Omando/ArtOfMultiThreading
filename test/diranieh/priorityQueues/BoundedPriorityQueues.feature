@@ -8,17 +8,17 @@ Feature: Bounded concurrent priority queues
     When I add the following items to the priority queue
       | item    | priority |
       | "Item3" | 3        |
-      | "Item5" | 5        |
+      | "Item0" | 0        |
       | "Item4" | 4        |
       | "Item2" | 2        |
       | "Item1" | 1        |
     And I call removeMin 5 times
     Then I should get these items in this order
+      | "Item0" |
       | "Item1" |
       | "Item2" |
       | "Item3" |
       | "Item4" |
-      | "Item5" |
     Examples:
     | implementation |
     | "ArrayBased"   |
