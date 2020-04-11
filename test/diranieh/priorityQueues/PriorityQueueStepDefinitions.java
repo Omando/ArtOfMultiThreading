@@ -7,27 +7,31 @@ import org.junit.Assert;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.CountDownLatch;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public class PriorityQueueStepDefinitions implements En {
+    private  int _threadCount;
     private int _range;
-    private PriorityQueue<String> pq;
-    List<String> removedItems;
+    private PriorityQueue<String> _pq;
+    List<String> _removedItems;
+    Map<String, Integer> _queueItems;
 
     public PriorityQueueStepDefinitions() {
 
         DataTableType((Map<String, String> row) -> new QueueItem(
                 row.get("item"),
-                Integer.parseInt(row.get(1))
+                Integer.parseInt(row.get("priority"))
         ));
 
-        Given("priority range is {int}", (Integer range) -> {
-            _range = range;
-        });
+        Given("priority range is {int}", (Integer range) -> _range = range);
 
         And("priority queue implementation is {string}", (String implementation) -> {
             switch (implementation) {
                 case "ArrayBased":
-                    pq = new ArrayBasedBoundedPriorityQueue<String>(_range);
+                    _pq = new ArrayBasedBoundedPriorityQueue<>(_range);
                     break;
                 default:
                     throw new IllegalArgumentException("Unsupported priority queue implementation");
@@ -35,54 +39,154 @@ public class PriorityQueueStepDefinitions implements En {
         });
 
         When("I add the following items to the priority queue", (DataTable rawData) -> {
-
             /* Three approaches to converting rowData DataTable to a list of QueueItem */
             // First approach: DataTable.asLists()
-            // Ignore first row which contains header details
-            List<QueueItem> queueItems1 = new ArrayList<>();
             List<List<String>> lists = rawData.asLists();
-            for (int i = 1; i < lists.size(); i++) {
-                QueueItem item = new QueueItem(lists.get(i).get(0), Integer.parseInt(lists.get(i).get(1)));
-                queueItems1.add(item);
-            }
+            List<QueueItem> queueItems1 = lists.stream()
+                    .skip(1)        // Ignore first row which contains header details
+                    .map(row -> new QueueItem(row.get(0), Integer.parseInt(row.get(1))))
+                    .collect(Collectors.toList());
 
             // Second approach: DataTable.asMaps
-            List<QueueItem> queueItems2 = new ArrayList<>();
-            List<Map<String, String>> maps = rawData.asMaps(String.class, String.class);
-            maps.forEach(map -> {
-                QueueItem item = new QueueItem(map.get("item"), Integer.parseInt(map.get("priority")));
-                queueItems2.add( item);
-            });
-            queueItems2.stream().forEach(item -> pq.add(item.getItem(), item.getPriority()));
+            Map<String, Integer> itemToPriority = getQueueItems(rawData);
 
-            // Third approach: DataTableType
-            /*List<QueueItem> queueItems3 = new ArrayList<>();
-            queueItems3 = rawData.asList(QueueItem.class);
+            // Third approach: DataTableType - see next method
 
-            // Add the items to the queue
-            queueItems3.stream().forEach(item -> pq.add(item.getItem(), item.getPriority()));*/
+            // Add items to the priority queue (using data from the second approach)
+            itemToPriority.forEach((item, priority) ->  _pq.add(item, priority));
         });
 
-        // Arrays.asList fails with ClassCastException
-        /*When("I add the following items to the priority queue", (QueueItem[] data) -> {
-            List<QueueItem> queueItems3 = Arrays.asList(data);
-
+        // java.lang.ClassCastException: class io.cucumber.datatable.DataTable cannot be cast to
+        // class java.util.List
+        /*When("I add the following items to the priority queue", (List<QueueItem> data) -> {
             // Add the items to the queue
-            queueItems3.stream().forEach(item -> pq.add(item.getItem(), item.getPriority()));
+            data.stream().forEach(item -> pq.add(item.getItem(), item.getPriority()));
         });*/
 
         And("I call removeMin {int} times", (Integer count) -> {
-            removedItems = new ArrayList<>(count);
+            _removedItems = new ArrayList<>(count);
             for (int i = 0; i < count; i++) {
-                removedItems.add(pq.removeMin());
+                _removedItems.add(_pq.removeMin());
             }
         });
+
         Then("I should get these items in this order", (DataTable data) -> {
             List<String> prioritizedItems = data.asList(String.class);
 
-            Assert.assertSame(removedItems.size(), prioritizedItems.size());
-            for (int i = 0; i <removedItems.size(); i++)
-                Assert.assertEquals(removedItems.get(i), prioritizedItems.get(i));
+            Assert.assertSame(_removedItems.size(), prioritizedItems.size());
+            for (int i = 0; i < _removedItems.size(); i++)
+                Assert.assertEquals(_removedItems.get(i), prioritizedItems.get(i));
         });
+
+        And("there are {int} threads acting on the priority queue", (Integer threadCount) -> _threadCount = threadCount);
+
+        When("each thread adds the following items to the priority queue$", (DataTable rawData) -> {
+
+            // Get list of items that each thread will add
+            _queueItems = getQueueItems(rawData);
+
+            // Invoke <threadCount> threads with each thread adding the same items
+            final CountDownLatch latch = new CountDownLatch(1);
+            Thread[] threads = new Thread[_threadCount];
+
+            // Create required number of threads with each thread all items in queueItems list
+            for (int i = 0; i < _threadCount; i++) {
+                threads[i] = new Thread( () -> {
+                    try {
+                        // Wait for a signal from the main test thread so that all  threads
+                        // start adding items concurrently
+                        latch.await();
+                        _queueItems.forEach((item, priority) ->  _pq.add(item, priority));
+                    } catch (InterruptedException exception) {
+                        System.out.println("Error adding items due to interruption: " + exception.getMessage());
+                        Thread.currentThread().interrupt();     // restore interrupt status
+                    }
+                    catch (Exception exception) {
+                        System.out.println("Exception adding: " + exception.getMessage());
+                    }
+                });
+
+                // Schedule all threads
+                threads[i].start();
+            }
+
+            // Start all threads
+            latch.countDown();
+
+            // Wait for all threads to finish
+            for (int i = 0; i < _threadCount; i ++) {
+                threads[i].join();
+            }
+            System.out.println("All threads completed adding items...");
+        });
+
+        And("threads remove items until the priority queue is empty", () -> {
+            _removedItems = new CopyOnWriteArrayList<>();
+            final CountDownLatch latch = new CountDownLatch(1);
+            Thread[] threads = new Thread[_threadCount];
+
+            // Invoke <threadCount> threads with each thread removing items
+            // until all items are removed
+            // Create required number of threads with each thread all items in queueItems list
+            for (int i = 0; i < _threadCount; i++) {
+                threads[i] = new Thread( () -> {
+                    try {
+                        // Wait for a signal from the main test thread so that all  threads
+                        // start adding items concurrently
+                        latch.await();
+                        String item;
+                        int lastKey = Integer.MIN_VALUE;
+                        while ((item = _pq.removeMin()) != null) {
+                            _removedItems.add(item);
+                            int key = _queueItems.get(item);
+                            Assert.assertTrue(key > lastKey);
+                        }
+                        // Thread completes if there are no more items to retrieve.
+
+                    } catch (InterruptedException exception) {
+                        System.out.println("Error adding items due to interruption: " + exception.getMessage());
+                        Thread.currentThread().interrupt();     // restore interrupt status
+                    }
+                    catch (Exception exception) {
+                        System.out.println("Exception adding: " + exception.getMessage());
+                    }
+                });
+
+                // Schedule all threads
+                threads[i].start();
+            }
+
+            // Start all threads
+            latch.countDown();
+
+            // Wait for all threads to finish
+            for (int i = 0; i < _threadCount; i ++) {
+                threads[i].join();
+            }
+            System.out.println("All threads completed removing items...");
+
+        });
+
+        Then("I should get these items in this order and each item repeated {int} times", (Integer count, DataTable rawData) -> {
+
+            // Get list of items that should have been added by all threads
+            List<String> expectedRemovedItems = rawData.asList(String.class);
+
+            // For all removed items, get count of identical items
+            Map<String, Long> removedItemsToItemCount =  _removedItems.stream()
+                    .collect(Collectors.groupingBy( Function.identity(), Collectors.counting()));
+
+            for (String item: expectedRemovedItems) {
+                Long itemCount =  removedItemsToItemCount.get(item);
+                Assert.assertEquals((long) itemCount, (long) count);
+            }
+        });
+    }
+
+    private Map<String, Integer> getQueueItems(DataTable rawData) {
+        List<Map<String, String>> maps = rawData.asMaps(String.class, String.class);
+        return maps.stream()
+                .map(row -> new QueueItem(row.get("item"), Integer.parseInt(row.get("priority"))))
+                .collect(Collectors.toMap(p -> p.getItem(), p -> p.getPriority()));
     }
 }
