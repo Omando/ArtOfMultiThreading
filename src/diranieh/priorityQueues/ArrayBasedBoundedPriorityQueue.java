@@ -23,6 +23,8 @@ public class ArrayBasedBoundedPriorityQueue<E> implements PriorityQueue<E> {
         pool[priority].push(item);
     }
 
+    // removeMin() method scans the bins in decreasing priority and returns
+    // the first item it successfully removes. If no item is found it returns null
     @Override
     public E removeMin() {
         for (int i = 0; i < priorityRange; i++) {
