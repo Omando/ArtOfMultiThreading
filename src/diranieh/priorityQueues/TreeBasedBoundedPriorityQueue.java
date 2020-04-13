@@ -89,7 +89,20 @@ public class TreeBasedBoundedPriorityQueue<E> implements PriorityQueue<E> {
 
     @Override
     public void add(E item, int priority) {
-        throw new IllegalStateException();
+        // Get leaf node for this priority
+        Node<E> node = _leaves.get(priority);
+
+        // Add this item to the leave's bin collection
+        node._bin.push(item);
+
+        // Traverse up to the root, incrementing the counter if ascending from left
+        while(node != _root) {
+            Node<E> parent = node._parent;
+            if (node == parent._left) { // increment if ascending from left
+                parent._counter.getAndIncrement();
+            }
+            node = parent;
+        }
     }
 
     @Override
