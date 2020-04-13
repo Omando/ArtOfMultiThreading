@@ -107,6 +107,14 @@ public class TreeBasedBoundedPriorityQueue<E> implements PriorityQueue<E> {
 
     @Override
     public E removeMin() {
-        throw new IllegalStateException();
+        Node<E> node = _root;
+        while(!node.isLeaf()) {
+            if (node._counter.getAndDecrement() > 0 ) {
+                node = node._left;
+            } else {
+                node = node._right;
+            }
+        }
+        return node._bin.pop(); // if null pqueue is empty
     }
 }
