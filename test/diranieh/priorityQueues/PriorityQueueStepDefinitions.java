@@ -185,8 +185,9 @@ public class PriorityQueueStepDefinitions implements En {
 
     private Map<String, Integer> getQueueItems(DataTable rawData) {
         List<Map<String, String>> maps = rawData.asMaps(String.class, String.class);
-        return maps.stream()
+        Map<String, Integer> priorityByItem =  maps.stream()
                 .map(row -> new QueueItem(row.get("item"), Integer.parseInt(row.get("priority"))))
                 .collect(Collectors.toMap(p -> p.getItem(), p -> p.getPriority()));
+        return priorityByItem;
     }
 }
