@@ -13,6 +13,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class PriorityQueueStepDefinitions implements En {
+    private  Integer _treeHeight;
     private  int _threadCount;
     private int _range;
     private PriorityQueue<String> _pq;
@@ -32,6 +33,9 @@ public class PriorityQueueStepDefinitions implements En {
             switch (implementation) {
                 case "ArrayBased":
                     _pq = new ArrayBasedBoundedPriorityQueue<>(_range);
+                    break;
+                case "TreeBased":
+                    _pq = new TreeBasedBoundedPriorityQueue<>(_treeHeight);
                     break;
                 default:
                     throw new IllegalArgumentException("Unsupported priority queue implementation");
@@ -180,6 +184,9 @@ public class PriorityQueueStepDefinitions implements En {
                 Long itemCount =  removedItemsToItemCount.get(item);
                 Assert.assertEquals((long) itemCount, (long) count);
             }
+        });
+        Given("tree height is {int}", (Integer treeHeight) -> {
+            _treeHeight = treeHeight;
         });
     }
 
