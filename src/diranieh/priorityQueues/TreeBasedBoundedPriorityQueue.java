@@ -31,8 +31,9 @@ public class TreeBasedBoundedPriorityQueue<E> implements PriorityQueue<E> {
     public TreeBasedBoundedPriorityQueue(int treeHeight) {
         int range = 1 << treeHeight;      // if logRange = 4, then range is 2^4 = 16 or 10000
         _leaves = new ArrayList<>(range);
-        _root = buildTree_BreadthTraversal(treeHeight);
-        Node<E> dummyRoot = buildTree_Recursive(treeHeight, 0); // dummyRoot should be equivalent to _root
+
+        _root = buildTree_BreadthTraversal(treeHeight); // Build the priority queue binary tree
+        //_root = buildTree_Recursive(treeHeight, 0);   // A recursive version of build the pq binary tree.
     }
 
     // Builds a binary tree using depth traversal
@@ -42,18 +43,19 @@ public class TreeBasedBoundedPriorityQueue<E> implements PriorityQueue<E> {
         queue.add(root);
 
         List<Node<E>> nextLevelNodes = new ArrayList<>();
-        for (int i = 1; i < treeHeight; i++) {
+        for (int i = 1; i <= treeHeight; i++) {
             while (!queue.isEmpty()) {
                 Node<E> node = queue.remove();
                 node._left = new Node<>();
                 node._right = new Node<>();
+                node._left._parent = node._right._parent = node;
 
                 nextLevelNodes.add(node._left);
                 nextLevelNodes.add(node._right);
             }
 
-            // Only do for internal nodes
-            if (i < treeHeight - 1) {
+            // Only do for internal (non-leaf) nodes
+            if (i <= treeHeight - 1) {
                 for (Node<E> nextLevelNode : nextLevelNodes) {
                     queue.add(nextLevelNode);
                 }
@@ -63,7 +65,9 @@ public class TreeBasedBoundedPriorityQueue<E> implements PriorityQueue<E> {
 
         // Setup leaves collection
         for (int i = 0; i < nextLevelNodes.size() ; i++) {
-            _leaves.set(i, nextLevelNodes.get(i));
+            Node<E> node = nextLevelNodes.get(i);
+            node._bin = new ConcurrentLockFreeStack<>();
+            _leaves.add(i, node);
         }
 
         return root;
@@ -76,9 +80,12 @@ public class TreeBasedBoundedPriorityQueue<E> implements PriorityQueue<E> {
         // Exit condition - height of a leaf node is zero
         if (treeHeight == 0) {
             node._bin = new ConcurrentLockFreeStack<>();
-            _leaves.set(poolSlot, node);
+            _leaves.add(poolSlot, node);
+            return node;
         }
 
+        // (2 * poolSlot) and (2 * poolSlot) + 1: When a binary tree is implemented as
+        // an array, node at index k has children at index 2k and 2k+1
         node._left = buildTree_Recursive( treeHeight - 1, 2 * poolSlot);
         node._right = buildTree_Recursive( treeHeight - 1, (2 * poolSlot) + 1);
         node._left._parent = node._right._parent = node;
