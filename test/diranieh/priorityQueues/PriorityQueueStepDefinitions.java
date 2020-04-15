@@ -13,6 +13,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class PriorityQueueStepDefinitions implements En {
+    private  Integer _capacity;
     private  Integer _treeHeight;
     private  int _threadCount;
     private int _range;
@@ -36,6 +37,9 @@ public class PriorityQueueStepDefinitions implements En {
                     break;
                 case "TreeBased":
                     _pq = new TreeBasedBoundedPriorityQueue<>(_treeHeight);
+                    break;
+                case "Sequential":
+                    _pq = new SequentialUnboundedPriorityQueue<>(_capacity);
                     break;
                 default:
                     throw new IllegalArgumentException("Unsupported priority queue implementation");
@@ -82,7 +86,9 @@ public class PriorityQueueStepDefinitions implements En {
                 Assert.assertEquals(_removedItems.get(i), prioritizedItems.get(i));
         });
 
-        And("there are {int} threads acting on the priority queue", (Integer threadCount) -> _threadCount = threadCount);
+        And("there are {int} threads acting on the priority queue", (Integer threadCount) -> {
+            _threadCount = threadCount;
+        });
 
         When("each thread adds the following items to the priority queue$", (DataTable rawData) -> {
 
@@ -187,6 +193,10 @@ public class PriorityQueueStepDefinitions implements En {
         });
         Given("tree height is {int}", (Integer treeHeight) -> {
             _treeHeight = treeHeight;
+        });
+
+        Given("priority capacity is {int}", (Integer capacity) -> {
+            _capacity = capacity;
         });
     }
 
