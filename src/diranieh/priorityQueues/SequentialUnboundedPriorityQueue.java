@@ -17,22 +17,13 @@ public class SequentialUnboundedPriorityQueue<E> implements  PriorityQueue<E> {
             this.item = item;
             this.priority = priority;
         }
-
-        /*public void init(E item, int priority) {
-            this.item = item;
-            this.priority = priority;
-        }*/
     }
 
     public SequentialUnboundedPriorityQueue(int capacity) {
         // We ignore first array entry. This means that a node at index k has left and right
         // children at indices 2k and 2k+1, respectively
-        _next = 1;      // Ignore first array entry
-        _heap = (HeapNode<E>[]) new HeapNode[capacity + 1];  // +1 because we are ignoring item at index 0
-
-    /*    for (int i = 1; i < capacity + 1; i++) {            // Ignore array item at index 0
-            heap[i] = new HeapNode<E>();
-        }*/
+        _next = 1;                                           // Ignore first array entry
+        _heap = (HeapNode<E>[]) new HeapNode[capacity + 1];  // +1: we are ignoring item at index 0
     }
 
     // Add an item at the first available heap slot, then "swim up" to balance the tree
@@ -93,7 +84,8 @@ public class SequentialUnboundedPriorityQueue<E> implements  PriorityQueue<E> {
             // look at the diagram in page 4 and apply these condition to node 3)
             if (leftChildIndex >= _next) {
                 break;
-            } else if (rightChildIndex >= _next || _heap[leftChildIndex].priority < _heap[rightChildIndex].priority) {
+            } else if (rightChildIndex >= _next ||
+                    _heap[leftChildIndex].priority < _heap[rightChildIndex].priority) {
                 childIndex = leftChildIndex;
             } else {
                 childIndex = rightChildIndex;
@@ -134,4 +126,3 @@ public class SequentialUnboundedPriorityQueue<E> implements  PriorityQueue<E> {
                 .forEach(index -> _heap[index] = copy[index]);
     }
 }
-
