@@ -10,8 +10,8 @@ public class SequentialUnboundedPriorityQueue<E> implements  PriorityQueue<E> {
 
     // Each element in the heap array is a HeapNode object that contains an item and its priority
     private static class HeapNode<E> {
-        int priority;
-        E item;
+        private final int priority;
+        private final E item;
 
         public HeapNode(E item, int priority) {
             this.item = item;
@@ -33,7 +33,6 @@ public class SequentialUnboundedPriorityQueue<E> implements  PriorityQueue<E> {
         //heap[childIndex].init(item, priority);
         int childIndex = _next++;
 
-        // continue here
         if (_next >= _heap.length)
             resize();
 
