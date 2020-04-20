@@ -22,12 +22,16 @@ public class Matrix {
         _colOffset = colOffset;
     }
 
+    public int getDimension() {
+        return _n;
+    }
+
     // Get and set particular element in a matrix
-    private double get(int row, int col) {
+    public double get(int row, int col) {
         return _matrix[row][col];
     }
 
-    private void set(int row, int col, double value) {
+    public void set(int row, int col, double value) {
         // Take into account any requires displacement
         _matrix[row + _rowOffset][col + _colOffset] = value;
     }
@@ -41,7 +45,7 @@ public class Matrix {
      this we use _rowDisplacement and _colDisplacement fields to correctly position each
      sub-matrix over the original matrix. With this approach, any changes to the original
      matrix are directly reflected in the sub-matrices, and vice versa */
-    private Matrix[][] split() {
+    public Matrix[][] split() {
         // Each split matrix has a dimension n = _n/2
         int n = _n / 2;      // recall _n is a power of 2
 
