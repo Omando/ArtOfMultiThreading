@@ -9,7 +9,7 @@ public class AddMatrixTask implements  Runnable {
     private final Matrix _c;
     private final ExecutorService _executorService;
 
-    public AddMatrixTask(Matrix a, Matrix b, Matrix c, ExecutorService executorService) {
+    public  AddMatrixTask(Matrix a, Matrix b, Matrix c, ExecutorService executorService) {
         _a = a;
         _b = b;
         _c = c;
