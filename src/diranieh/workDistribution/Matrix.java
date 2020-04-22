@@ -28,7 +28,8 @@ public class Matrix {
 
     // Get and set particular element in a matrix
     public double get(int row, int col) {
-        return _matrix[row][col];
+        // Take into account any requires displacement
+        return _matrix[row + _rowOffset][col + _colOffset];
     }
 
     public void set(int row, int col, double value) {
