@@ -64,8 +64,7 @@ public class MultiplyMatrixTask implements  Runnable {
             }
         }
         catch (Exception ex) {
-            System.out.println(ex   );
+            System.out.println(ex);
         }
-
     }
 }
