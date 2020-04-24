@@ -1,4 +1,4 @@
-package diranieh.workDistribution;
+package diranieh.workDistribution.matrixOperations;
 
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;

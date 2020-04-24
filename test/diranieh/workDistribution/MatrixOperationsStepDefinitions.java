@@ -1,5 +1,8 @@
 package diranieh.workDistribution;
 
+import diranieh.workDistribution.matrixOperations.IMatrixTask;
+import diranieh.workDistribution.matrixOperations.Matrix;
+import diranieh.workDistribution.matrixOperations.MatrixTask;
 import io.cucumber.datatable.DataTable;
 import io.cucumber.java8.En;
 import org.junit.Assert;
