@@ -10,8 +10,8 @@ package diranieh.utilities;
 public class ThreadNumberGenerator {
     private volatile static int nextId = 0;
 
-    // Always helps to think of ThreadLocal<T> as a Map<Thread, T>
-    // that stores thread-specific values
+    // Always helps to think of ThreadLocal<T> as a Map<Thread, T> which stores
+    // thread-specific values
     private static ThreadLocal<Integer> threadNumber = ThreadLocal.withInitial(() -> nextId++);
 
     public static int get() {
