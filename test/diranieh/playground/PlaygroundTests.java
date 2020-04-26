@@ -3,6 +3,8 @@ package diranieh.playground;
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 
+import java.util.concurrent.*;
+
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
 public class PlaygroundTests {
@@ -63,5 +65,36 @@ public class PlaygroundTests {
 
     private int preIncrement(int index) {
         return ++index;
+    }
+
+    @Test
+    void foo() throws ExecutionException, InterruptedException {
+
+        // Create a thread pool
+        ExecutorService executorService = Executors.newFixedThreadPool(10);
+
+        // Create a runnable task that does not return a value
+        Runnable runnableTak = new Runnable() {
+            @Override
+            public void run() {
+                System.out.println("Inside Runnable.run()");
+            }
+        };
+
+        // Create a callable task that returns an Ineger
+        Callable<Integer> callableTask = new Callable<Integer>() {
+            @Override
+            public Integer call() throws Exception {
+                return 10;
+            }
+        } ;
+
+        // Future<?> means it's a future that does not return a value of interest
+        Future<?> runnableResult = executorService.submit(runnableTak);
+         runnableResult.get();
+
+        Future<Integer> callableResult = executorService.submit(callableTask);
+        Integer result = callableResult.get();
+
     }
 }
