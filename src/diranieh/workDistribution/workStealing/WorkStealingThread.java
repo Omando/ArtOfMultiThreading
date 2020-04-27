@@ -13,7 +13,7 @@ import java.util.Random;
  popTop method on the thread's pool
 */
 public class WorkStealingThread {
-    private final WorkStealingDequeue[] _dequeues;
+    private final WorkStealingDequeue[] _dequeues;  // An array of dequeues, with a dequeue for each thread
     private final Random _random;
 
     public WorkStealingThread(WorkStealingDequeue[] dequeues) {
