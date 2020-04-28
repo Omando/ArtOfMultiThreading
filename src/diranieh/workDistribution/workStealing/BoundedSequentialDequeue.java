@@ -18,20 +18,20 @@ public class BoundedSequentialDequeue<E> {
         _indexBottom++;
     }
 
+    public E popTop() {
+        if (isEmpty())
+            throw new IllegalStateException("Dequeue is empty");
+        E item = _items[_indexTop];
+        _indexTop++;
+        return item;
+    }
+
     public E popBottom() {
         if (isEmpty())
             throw new IllegalStateException("Dequeue is empty");
 
         E item = _items[_indexBottom - 1];
         _indexBottom--;
-        return item;
-    }
-
-    public E popTop() {
-        if (isEmpty())
-            throw new IllegalStateException("Dequeue is empty");
-        E item = _items[_indexTop];
-        _indexTop++;
         return item;
     }
 
