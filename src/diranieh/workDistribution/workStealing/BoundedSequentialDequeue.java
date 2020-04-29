@@ -23,6 +23,12 @@ public class BoundedSequentialDequeue<E> {
             throw new IllegalStateException("Dequeue is empty");
         E item = _items[_indexTop];
         _indexTop++;
+
+        // Special case: If popTop was called an equal number of times as pushBottom,
+        // then indices aligns and we can reset both to zero
+        if(_indexBottom == _indexTop) {
+            _indexBottom = _indexTop = 0;
+        }
         return item;
     }
 
@@ -41,5 +47,13 @@ public class BoundedSequentialDequeue<E> {
 
     public int get_Capacity() {
         return _items.length;
+    }
+
+    public int get_indexTop() {
+        return _indexTop;
+    }
+
+    public int get_indexBottom() {
+        return _indexBottom;
     }
 }
