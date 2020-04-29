@@ -100,5 +100,9 @@ public class BoundedDequeueStepDefinitions implements En {
                 _poppedItems.add(item);
             }
         });
+        And("indexes are reset", () -> {
+            Assert.assertEquals(_dequeue.get_indexBottom(), 0);
+            Assert.assertEquals(_dequeue.get_indexBottom(), 0);
+        });
     }
 }
