@@ -93,7 +93,7 @@ public class BoundedConcurrentDequeue {
         int newTop = 0;
         int oldStamp = stamp[0];
         int newStamp = oldStamp + 1;
-        if (bottom > oldStamp)
+        if (bottom > oldTop)
             return task;
 
         // If the top and bottom fields are equal, then there is only one task left. The caller
