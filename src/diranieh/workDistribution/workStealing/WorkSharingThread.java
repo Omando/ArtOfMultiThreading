@@ -39,7 +39,7 @@ public class WorkSharingThread extends Thread {
                 // Each queue in _queues is managed by a thread. Choose one such random thread
                 int victimThreadId = _random.nextInt(_queues.length);
 
-                // Lock queues in order of id
+                // Lock queues in order of thread id
                 int lowId = Math.min(victimThreadId, myThreadId);
                 int highId = Math.max(victimThreadId, myThreadId);
 
