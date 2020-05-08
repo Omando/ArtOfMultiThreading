@@ -16,10 +16,10 @@ public class ExponentialBackoff {
     public void backOff() throws InterruptedException {
         // Initially we start with a delay up to the given minimum, then exponentially
         // increment the delay by a power of 2 for each successive back off
-        Thread.sleep(_currentDelay);
-
-        // Setup delay for next backoff
-        int limit = Math.min(_maxDelay, _currentDelay * 2);
-        _currentDelay = _random.nextInt(limit);
+        int delay = _random.nextInt(_currentDelay);
+        if (_currentDelay < _maxDelay) { // double limit if less than max
+            _currentDelay = 2 * _currentDelay;
+        }
+        Thread.sleep(delay);
     }
 }
