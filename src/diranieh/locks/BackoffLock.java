@@ -6,7 +6,7 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 
 public class BackoffLock implements Lock {
-    private AtomicBoolean state = new AtomicBoolean(false);
+    private final AtomicBoolean state = new AtomicBoolean(false);
     private static final int MIN_DELAY = 2;         // 2 msec
     private static final int MAX_DELAY = 64;        // 64 msec
 
