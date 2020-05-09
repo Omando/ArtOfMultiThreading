@@ -4,6 +4,13 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 
+/* SimpleReentrantLock implements a re-entrant lock. A lock is re-entrant if it can
+ be acquired multiple times by the same thread. The holdCount field is incremented each
+  time the lock is acquired, and decremented each time the lock is released. The lock
+  is free when holdCount is zero.
+  Class fields ownerId and holdCount constitute the state and must therefore be protected
+  from concurrent access.
+*/
 public class SimpleReentrantLock implements Lock {
     private final Object lock;
     private long ownerId = -1;
