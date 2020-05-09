@@ -19,7 +19,7 @@ public class MCSLock implements Lock {
     public MCSLock() {
         _tail = new AtomicReference<>(null);
 
-        // First node in the linked list is can be locked by the first thread
+        // First node in the linked list is available for the first thread
         _myNode = ThreadLocal.withInitial(() -> new QNode());
     }
 
