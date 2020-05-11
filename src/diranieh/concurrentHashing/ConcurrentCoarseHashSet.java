@@ -5,7 +5,21 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
- * A coarse-grained concurrent hash set
+ * A coarse-grained concurrent hash set.
+ * Synchronization is provided by a single re-entrant lock acquired by acquire and
+ * released by release methods.
+ * A simple resizing policy is used: we resize when the average bucket size exceeds a
+ * configurable value (passed via constructor). On resizing, a table twice as big as
+ * the original one is allocated, and all existing items are rehashed to identify their
+ * new buckets.
+ * The add method employs a check-then-act idiom. The typical approach to make this
+ * check-then-act idiom would be to synchronize access to both within a single lock.
+ * Because this check-then-act is in the base class and to allow derived-class
+ * implementations to offer different kind of synchronizations, the synchronization
+ * is done inside the resize method.
+ * While this implementation is easy, it suffers from a sequential bottleneck; method
+ * calls take effect in a one-at-a-time order.
+ *
  * @param <E> the type of elements in this hash set
  */
 public class ConcurrentCoarseHashSet<E> extends BaseHashSet<E> {
