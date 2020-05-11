@@ -7,6 +7,9 @@ import java.util.Random;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+/* This basic concurrent implementation just adds a re-entrant lock around the
+add/remove/contains/isEmpty methods of Set<E>
+* */
 public class CoarseCuckooHashSet<E>  implements Set<E> {
     final static int CLEAR_MSB = 0x7FFFFFFF;
     final static int ADD_RETRY_LIMIT = 16;

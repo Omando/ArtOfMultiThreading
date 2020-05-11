@@ -4,6 +4,19 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicMarkableReference;
 import java.util.concurrent.locks.ReentrantLock;
 
+/*  ConcurrentRefinedStripedHashSet refines the granularity of locking as the table
+size grows sl that the number of locations in a stripe does not continuously grow.
+ To add a higher level of synchronization, we introduce a globally shared owner field
+ that combines two values: a boolean value and a reference to a thread. These two values
+ are combined in an AtomicMarkableReference<Thread> to allow them to be modified atomically.
+
+ On startup, the thread reference is null and the boolean value is false, meaning that the
+ set is not in the middle of resizing. While a resizing is in progress, however, the Boolean
+ value is true, and the associated reference indicates the thread that is in charge of resizing.
+  We use the owner as a mutual exclusion flag between the resize() method and any of the add()
+  methods, so that while resizing, there will be no successful updates, and while updating,
+  there will be no successful resizes.
+* */
 public class ConcurrentRefinedStripedHashSet<E> extends BaseHashSet<E> {
     // An AtomicMarkableReference maintains an object reference along with
     // a mark bit, that can be updated atomically.
