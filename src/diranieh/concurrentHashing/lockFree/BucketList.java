@@ -4,6 +4,7 @@ import java.util.concurrent.atomic.AtomicMarkableReference;
 
 import static java.lang.Integer.reverse;
 
+/* Not used. Ignore */
 public class BucketList<E> {
     static final int MSB_ON_MASK  = 0X80000000;
     static final int LOWEST_3_BYTES_MASK = 0X00FFFFFF;
@@ -55,7 +56,7 @@ public class BucketList<E> {
         // Create an empty list
         head = new Node<>(0);     // Create a sentinel node to bucket 0
 
-        // Tail is sentinel node to larget possible bucket index
+        // Tail is sentinel node to largest possible bucket index
         head.next = new AtomicMarkableReference<Node<E>>(new Node<E>(Integer.MAX_VALUE), false);
     }
 

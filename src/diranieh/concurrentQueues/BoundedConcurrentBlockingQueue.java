@@ -6,6 +6,17 @@ import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * A bounded concurrent queue implemented using a linked list
+ * enqueue and dequeue methods operate on opposite ends of the queue. As long as the
+ * queue is neither full nor empty, an enqueue call and a dequeue call should be able
+ * to proceed without interference.
+ *
+ * Concurrent enqueue calls will operate on the same end and will most likely interfere
+ * with each other. Condition predicate for enqueue is queue must not be full
+ *
+ * Concurrent dequeue calls will operate on the same end and will most likely interfere
+ * with each other. Condition predicate for dequeue: queue must not be empty.
+ *
+ * The first node in the queue is a sentinel node whose value is meaningless.
  * @param <E> the type of elements in this list
  */
 public class BoundedConcurrentBlockingQueue<E> implements Queue<E>  {
@@ -124,7 +135,6 @@ public class BoundedConcurrentBlockingQueue<E> implements Queue<E>  {
     private boolean isNotFull() {
         return size.get() < capacity;
     }
-
     private boolean isNotEmpty() {
         return size.get() > 0;
     }

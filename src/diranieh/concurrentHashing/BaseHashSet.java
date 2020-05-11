@@ -5,16 +5,16 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * Base class implementation of close-addressing hash set
+ * Abstract base class implementation for closed-addressing hash set implementations
  *
  * Note regarding calculating hash codes:
  * The mod operator returns a non-positive integer if its first argument is negative;
- * this may happen if E's user-supplied hashCode() was not guaranteed to always return
- * a positive value. The result of the mod operator in this case throws an out-of-bounds
- * exception. One work around is to use Math.Abs(x) mod M, but the absolute value function
- * can even return a negative integer (1 in 4 Billion!). This happens if its argument is
- * Integer.MIN_VALUE because the resulting positive integer cannot be represented using a
- * 32-bit two's complement integer.
+ * this may happen if type E's user-supplied hashCode() was not guaranteed to always
+ * return a positive value. The result of the mod operator in this case throws an out-
+ * of-bounds exception. One work around is to use Math.Abs(x) mod M, but the absolute
+ * value function can even return a negative integer (1 in 4 Billion!). This happens if
+ * its argument is Integer.MIN_VALUE because the resulting positive integer cannot be
+ * represented using a 32-bit two's complement integer.
  *
  * We therefore ensure the hash code is always positive by ANDing it with 0x7FFF FFFF.
  * 0x7FFF FFFF in binary is 0111 1111 1111 1111 1111 1111 1111 1111 (all 1s except the sign
