@@ -7,9 +7,22 @@ import java.util.concurrent.locks.ReentrantLock;
 /**
  * Concurrent hash set using lock striping
  *
- * Synchronization policy: although the locks[] is initially of the same capacity as the
- * table[] (underlying hash table), table[] will grow when the set is resized, but lock[]
- * will not grow. This means that the ith lock protects table entry j where
+ * Instead of using a single lock to synchronize the entire set {@link ConcurrentCoarseHashSet},
+ * we split the set into independently synchronized pieces using a technique called lock striping.
+ * For example, the implementation of ConcurrentHashMap uses an array of 16 locks, each of which
+ * guards 1/16 of the hash buckets; bucket N is guarded by lock N mod 16. This should reduce the
+ * demand for any given lock by a factor of 16 assuming the hash function provides reasonable
+ * spreading and keys are accessed uniformly. It is this technique that allows ConcurrentHashMap
+ * to support up to 16 concurrent writers.
+ *
+ * With lock striping, an operation can usually be performed by acquiring at most one lock, but
+ * occasionally you need to lock the entire collection, as when ConcurrentHashMap needs to expand
+ * the map and rehash the values into a larger set of buckets. This is done by acquiring all of
+ * the locks in the stripe set.
+ *
+ * Synchronization policy: although the locks[] array is initially of the same capacity
+ * as the table[] array (underlying hash table), table[] will grow when the set is resized,
+ * but lock[] will not grow. This means that the ith lock protects table entry j where
  * j = i.hashCode % lock.length
  * Recall that that the modulus operator is cyclic meaning the hash code will repeat every
  * lock.length items.

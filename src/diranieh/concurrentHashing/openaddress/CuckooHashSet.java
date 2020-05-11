@@ -7,7 +7,20 @@ import java.util.Random;
 
 /**
  * Implement Cuckoo hashing, a sequential hashing algorithm in which a newly added item
- * displaces any earlier item occupying the same slot
+ * displaces any earlier item occupying the same slot.
+ *
+ * Successive cuckoo hashing provides constant time contains and remove methods. We define
+ * a table as a k-entry array of items. For a hash set of size N = 2k, we define an array
+ * having two entries where each entry is a table.
+ *
+ * The add(x) method successively kicks out conflicting items until every key has a slot
+ * or a pre-set condition is reached such as the table being full or because the sequence
+ * of displacements form a cycle
+ *
+ * If we do not find an empty slot either because the table is full, or because the sequence
+ * of displacements forms a cycle, we place an upper limit on the number of successive
+ * displacements. If this limit is reached, we resize the hash tables, choose new functions
+ * and start over.
  *
  * Note regarding calculating hash codes:
  * The mod operator returns a non-positive integer if its first argument is negative;
