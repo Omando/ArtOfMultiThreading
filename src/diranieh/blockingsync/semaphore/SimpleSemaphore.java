@@ -4,7 +4,7 @@ package diranieh.blockingsync.semaphore;
  Start by identifying the condition predicate; number of available slots must be less
  than total capacity. Condition predicate implies an invariant which is totalCapacity and
  a used-slot counter that is incremented/decremented on acquire/release.
- This class has identical structure to   {@link SimpleReentrantLock} class
+ This class has identical structure to  {@link SimpleReentrantLock} class
 */
 public class SimpleSemaphore implements Semaphore {
     private final Object lock = new Object();
