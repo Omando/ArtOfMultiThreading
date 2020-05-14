@@ -4,6 +4,13 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+/* SynchronousQueue<E> implements the following pattern:
+*   One or more producer threads produce items to be removed in FIFO order by one or more consumers threads.
+*   Producers and consumers rendezvous with each other:
+*       A producer that puts an item in the queue blocks until that item is removed by a consumer.
+*       A consumers that reads an item from the queue blocks until an item is added by a producer.
+*   This design incurs a high synchronization cost. Both enqueuers and dequeuers wake up all waiting threads
+* */
 public class SynchronousQueue<E> implements Queue<E> {
     private E item;
     private final Lock lock;
