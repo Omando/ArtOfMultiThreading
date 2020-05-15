@@ -8,6 +8,16 @@ import java.util.concurrent.atomic.AtomicReference;
  * Recall the characteristics of all nonblocking algorithms: some work is done
  * speculatively and may have to be redone.
  *
+ * The overall operation of the lock-free enqueue is as follows:
+ *  1. Create a new node and locate the last node in the queue.
+ *  2. A call to compareAndSet changes the next field of the node referenced by the
+ *  queue’s tail from null to the new node.
+ *  3. A call to CompareAndSet changes the queue’s tail from the prior last node to the
+ *  current last node.
+ *
+ *  Because the last two steps are not executed atomically, every other method call
+ *  must be prepared to encounter a half-finished enqueue call, and to finish the job
+ *
  * @param <E> the type of elements in this list
  */
 public class UnboundedConcurrentLockFreeQueue<E> implements Queue<E>  {
