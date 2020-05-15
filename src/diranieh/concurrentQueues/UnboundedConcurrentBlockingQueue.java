@@ -4,6 +4,17 @@ import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * An unbounded concurrent queue implemented using a linked list
+ * Similar notes from {@link BoundedConcurrentBlockingQueue} apply, except that there
+ * are no condition predicates; enqueue always enqueues its item, and dequeue throws
+ * an exception if there is no item to dequeue.
+ *
+ * The representation is the same as {@link BoundedConcurrentBlockingQueue} except there
+ * is no need to count the number of items in the queue, or to provide condition queues
+ * on which to wait.
+ *
+ * As usual, the queue's actual head is head.next and the actual tail is tail.next which
+ * is also the last item reachable from the head
+ *
  * @param <E> the type of elements in this list
  */
 public class UnboundedConcurrentBlockingQueue<E> implements Queue<E>   {
