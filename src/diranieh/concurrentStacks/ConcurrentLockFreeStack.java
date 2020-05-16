@@ -2,6 +2,15 @@ package diranieh.concurrentStacks;
 
 import java.util.concurrent.atomic.AtomicReference;
 
+/**
+ * Concurrent lock free stack implemented as a linked list
+ * The implementation is fairly simple and can be easily understood by
+ * writing a basic thread-unsafe version using a linked list.
+ *
+ * Lock-free concurrency is obtained by applying CAS to the top field
+ * when pushing or popping.
+ * @param <E> the type of elements in the stack
+ */
 public class ConcurrentLockFreeStack<E> implements Stack<E> {
     private static class Node<E> {
         private E item;
@@ -17,11 +26,11 @@ public class ConcurrentLockFreeStack<E> implements Stack<E> {
         }
     }
 
-    // Sentinels
+    // Sentinel
     private Node<E> head;
 
     public ConcurrentLockFreeStack() {
-            head =  new Node<>(null);
+        head =  new Node<>(null);
     }
 
     @Override
