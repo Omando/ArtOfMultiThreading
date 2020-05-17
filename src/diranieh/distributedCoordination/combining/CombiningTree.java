@@ -4,10 +4,16 @@ import diranieh.utilities.ThreadNumberGenerator;
 
 import java.util.Stack;
 
-/*
- * Manages navigation in a binary tree
+/**
+ * A concurrent counter implemented using a binary tree
  *
- * The combining tree is a binary tree implemented using an array.
+ * A combining tree has the following characteristics:
+ *   The final count is stored in the root node.
+ *   Each node contains bookkeeping information
+ *   Each thread is assigned a leaf node.
+ *   A leaf node can be shared by at most two threads. If there are n physical
+ *   processors, then the tree must have n/2 leaf nodes.
+ *
  * Recall these useful facts about binary tree:
  *  If N is the number of nodes, then the number of leaves L = (N+1)/2
  *  If L is the number of leaves, the the number of nodes N = 2L - 1
