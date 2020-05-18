@@ -11,9 +11,9 @@ import java.util.concurrent.locks.ReentrantLock;
  * linked list. This fine-grained locking permits multiple concurrent threads to traverse
  * the list all together in a pipelined fashion.
  *
- * Each node has its Lock object, with lock and unlock methods.
+ * Each node has its own Lock object, with lock and unlock class member methods.
  *
- * Thread  acquire locks on nodes in a hand-over-hand order: except for the initial sentinel
+ * Threads acquire locks on nodes in a hand-over-hand order: except for the initial sentinel
  * node, a thread acquires the lock for a node only when holding the lock for its predecessor.
  *
  * @param <E> the type of elements in this list
