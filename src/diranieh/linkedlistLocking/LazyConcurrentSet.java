@@ -4,6 +4,22 @@ import diranieh.utilities.Set;
 
 import java.util.concurrent.locks.ReentrantLock;
 
+/**
+ * LazyConcurrentSet refines  {@link OptimisticConcurrentSet} such that the
+ * contains method is wait-free and add/remove methods, while still blocking,
+ * traverse the list only once.
+ *
+ * The key insight is that deleting nodes causes troubles, so we’d like to do
+ * it lazily. This is done by adding a marked boolean field to the Node class;
+ * a marked node (marked = true) means that the node is unreachable. This is
+ * called logical removal. Physical removal is when predecessor.next is redirected
+ * to node.next.
+ *
+ * Adding marked field eliminates the need to validate that the node is reachable
+ * by re-traversing the whole list. If a thread finds a marked node, then that
+ * node is not in the set.
+ * @param <E>
+ */
 public class LazyConcurrentSet<E> implements Set<E> {
     private static class Node<E> {
         private final E item;
