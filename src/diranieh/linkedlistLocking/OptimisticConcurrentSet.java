@@ -17,6 +17,10 @@ import java.util.concurrent.locks.ReentrantLock;
  *  when they were last read by the current thread and when the current thread acquired the lock
  *  on those two nodes.
  *
+ * This implementation works best if the cost of traversing the list twice without locking is
+ * significantly less than the cost of traversing the list once with locking. Also note that
+ * contains() implementation acquires locks, and contains calls are likely to be much more common
+ * than calls to other methods. These limitations are addressed in {@link LazyConcurrentSet}
  * @param <E> the type of elements in this list
  */
 public class OptimisticConcurrentSet<E> implements Set<E> {
