@@ -5,6 +5,11 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 
+/**
+ * MCSLock is very similar to {@link CLHLock}, however MCSLock represents a lock
+ * as an explicit linked list of QNode objects, where each QNode represents either
+ * a lock holder or a thread waiting to acquire the lock.
+ */
 public class MCSLock implements Lock {
 
     // Linked list of nodes

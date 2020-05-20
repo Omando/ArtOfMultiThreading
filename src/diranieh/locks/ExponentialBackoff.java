@@ -2,6 +2,9 @@ package diranieh.locks;
 
 import java.util.Random;
 
+/**
+ * Implements a simple exponential delay. Used by {@link BackoffLock}
+ */
 public class ExponentialBackoff {
     private final int _maxDelay;
     private final Random _random;

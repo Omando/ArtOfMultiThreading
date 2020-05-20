@@ -5,6 +5,18 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 
+/**
+ * CLHLock records each thread’s status in a QNode object which has a boolean locked
+ * field. If locked is true, then the corresponding thread has either acquired the
+ * lock or is waiting for the lock, and if false, the thread has released the lock.
+ *
+ * Each thread refers to its predecessor through a ThreadLocaL<QNode> predecessor
+ * variable. This effectively creates a virtual (or implicit) linked list of QNode
+ * objects
+ *
+ * When a thread attempts to acquire a lock, it spins on its predecessor node waiting
+ * for the locked field to become false.
+ */
 public class CLHLock implements Lock {
 
     private static class QNode {
