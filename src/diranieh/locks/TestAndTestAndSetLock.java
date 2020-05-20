@@ -5,13 +5,14 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 
-/* Simple class to illustrate the concept and test and test and set. This class scales
-much better than TestAndSet: Assume the lock is held by a thread A. The FIRST TIME thread
-B reads the lock it takes a cache miss, forcing B to block while the value is loaded into
-B’s cache via the shared memory bus. As long as A holds the lock, B repeatedly rereads the
-value, but hits in the cache every time. B thus produces no bus traffic, and does not slow
-down other threads’ memory accesses */
-public class TestAndTestAndSet implements Lock {
+/** Simple class to illustrate the concept and test and test and set. This class scales
+ * much better than {@link TestAndSetLock}: Assume the lock is held by a thread A. The
+ * FIRST TIME thread B reads the lock it takes a cache miss, forcing B to block while
+ * the value is loaded into B’s cache via the shared memory bus. As long as A holds the
+ * lock, B repeatedly rereads the value, but hits in the cache every time. B thus produces
+ * no bus traffic, and does not slow down other threads’ memory accesses
+ * */
+public class TestAndTestAndSetLock implements Lock {
     AtomicBoolean state = new AtomicBoolean(false);
 
     @Override
