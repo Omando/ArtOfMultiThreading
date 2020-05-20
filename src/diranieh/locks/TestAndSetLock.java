@@ -5,13 +5,14 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 
-/* Simple class to illustrate the concept and test and set. This lock scales poorly:
- Each getAndSet() call is broadcast on the shared memory bus. Because all threads must
- use the memory bus to communicate with memory, these getAndSet() calls delay all threads,
- even those not waiting for the lock. Even worse, the getAndSet() call forces other
- processors to discard their own cached copies of the lock, so every spinning thread
- encounters a cache miss almost every time, and must use the bus to fetch the new,
- but unchanged value */
+/** Simple class to illustrate the concept and test and set. This lock scales poorly:
+ * Each getAndSet() call is broadcast on the shared memory bus. Because all threads
+ * must use the memory bus to communicate with memory, these getAndSet() calls delay
+ * all threads, even those not waiting for the lock. Even worse, the getAndSet() call
+ * forces other processors to discard their own cached copies of the lock, so every
+ * spinning thread encounters a cache miss almost every time, and must use the bus to
+ * fetch the new, but unchanged value
+ * */
 public class TestAndSetLock implements Lock {
     AtomicBoolean state = new AtomicBoolean(false);
 
