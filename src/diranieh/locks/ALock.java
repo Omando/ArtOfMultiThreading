@@ -5,6 +5,17 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 
+/**
+ * ALock is a cyclic queue-based lock
+ *
+ * ALock improves on {@link BackoffLock} because it reduces invalidations to a minimum
+ * and minimizes the interval between when a lock is freed by one thread and when it is
+ * acquired by another.
+ *
+ * The ALock lock is not space efficient; it requires a known bound n on the maximum number
+ * of concurrent threads, and it allocates an array of that size per lock. Synchronizing
+ * N distinct object requires O(Ln) space
+ */
 public class ALock implements Lock {
     private final AtomicInteger _tail;      // index of an available slot
     private final int _size;                // array size
