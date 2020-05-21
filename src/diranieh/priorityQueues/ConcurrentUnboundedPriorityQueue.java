@@ -5,6 +5,15 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.IntStream;
 
+/**
+ * ConcurrentUnboundedPriorityQueue class uses locks as follows:
+ *  A heapLock field to make short, atomic modifications to two or more fields.
+ *  Inner class HeapNode class has a lock field used to hold lock for short-lived
+ *  modifications, and also while the node is being percolated down the tree.
+ *  The node being percolated down is locked until it reaches its proper position.
+ *  When we swap two nodes, we lock them both, and swap their fields.
+ * @param <E>
+ */
 public class ConcurrentUnboundedPriorityQueue<E> implements PriorityQueue<E> {
     // recall some basics: static means only copy available for all classes.
     // To ensure this single copy is immutable, make it final
