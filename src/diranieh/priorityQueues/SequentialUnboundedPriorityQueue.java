@@ -3,6 +3,14 @@ package diranieh.priorityQueues;
 import java.util.Arrays;
 import java.util.stream.IntStream;
 
+/**
+ * SequentialUnboundedPriorityQueue is a thread unsafe priority queue that supports
+ * priorities from an unbounded range.
+ *
+ * Swimming or sinking concepts are used to balance the priority queue following
+ * addition or removal of entries
+ * @param <E> is the type of the elements in the priority queue
+ */
 public class SequentialUnboundedPriorityQueue<E> implements  PriorityQueue<E> {
     private HeapNode<E>[] _heap;                 // Heap array. Item at index 0 is not used
     private static final int ROOT_INDEX = 1;    // The root node is at index 1 in the heap array
