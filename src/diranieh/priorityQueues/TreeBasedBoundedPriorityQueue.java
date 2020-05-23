@@ -8,6 +8,20 @@ import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.atomic.AtomicInteger;
 
+/**
+ * This tree based bounded priority queue is implemented as a binary tree
+ * of TreeNode objects.
+ *
+ * If the priority range is 0 to m-1, then the tree has m leaves.
+ *
+ * Nodes are used as follows:
+ * The ith leaf node has a container (ConcurrentLockFreeStack<E>) that holds
+ * items of priority i. Internal nodes hold the number of items in the subtree
+ * rooted at the node’s left child. Because each internal node holds a counter,
+ * there are m-1 shared bounded counters in the tree’s internal nodes.
+ *
+ * @param <E> the type of the elements in the priority queue
+ */
 public class TreeBasedBoundedPriorityQueue<E> implements PriorityQueue<E> {
     private static class Node<E> {
         private final AtomicInteger _counter;
