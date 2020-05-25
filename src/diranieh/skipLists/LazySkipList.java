@@ -4,12 +4,22 @@ import java.util.Random;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-/* A concurrent implementation of a skip list based on LazyConcurrentSet
-
- This highest level can be maintained dynamically to reflect the highest level
- actually in the SkipList. This was done in SkipListSet, but for brevity, we do
- not do so here and searches always start at the max level
-* */
+/** A concurrent implementation of a skip list based on LazyConcurrentSet. Each
+ * level of skip list is a linked list implemented using {@link LazyConcurrentSet}
+ * Similar to {@link LazyConcurrentSet}, the add and remove methods use optimistic
+ * fine-grained locking, while the contains method is lock-free.
+ *
+ * Recall that in all set implementations, the Node inner class contains a hashCode
+ * field. The hashCode field is the item’s hash code. Nodes are sorted in hash code
+ * order, providing an efficient way to detect when an item is absent.
+ *
+ * As in {@link LazyConcurrentSet}, each node has its own lock and a marked field.
+ * The marked field is used to indicate whether the node is in the list or has been
+ * logically deleted. The fullyLinked fiels is used to indicated if the node has been
+ * linked in lists at all available levels.
+ *
+ * @param <E>: the type of the set element
+ */
 public class LazySkipList<E> {
     // Define structure of each node
     private static final class Node<E> {
