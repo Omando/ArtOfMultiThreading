@@ -1,10 +1,10 @@
 package diranieh.utilities;
 
 /**
- * Assign sequential Ids to threads
- * If thread A is the 1st thread to call get(), it will get 0 (nextId is then POST incremented to 1)
- * If thread B is the 2nd thread to call get(), it will get 1 (nextId is then POST incremented to 2)
- * If thread C is the 3rd thread to call get(), it will get 2 (nextId is then POST incremented to 3)
+ * Assign sequential Ids to threads in a thread-safe manner. For example,
+ *  if thread A is the 1st thread to call get(), it will get 0 (nextId is then POST incremented to 1)
+ *  if thread B is the 2nd thread to call get(), it will get 1 (nextId is then POST incremented to 2)
+ *  if thread C is the 3rd thread to call get(), it will get 2 (nextId is then POST incremented to 3)
  * and so on
  */
 public class ThreadNumberGenerator {
