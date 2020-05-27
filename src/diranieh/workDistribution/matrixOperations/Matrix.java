@@ -1,7 +1,9 @@
 package diranieh.workDistribution.matrixOperations;
 
-/* Internal representation of a matrix. Assumes the matrix is n x n where
- n is a power of 2 */
+/**
+ *  Internal representation of a matrix. Assumes the matrix is n x n where
+ *  n is a power of 2
+ * */
 public class Matrix {
     private final int _n;           //
     private final double[][] _matrix;
