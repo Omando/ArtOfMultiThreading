@@ -3,6 +3,24 @@ package diranieh.workDistribution.matrixOperations;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 
+/**
+ * Given matrices A and B (both n x n and n is a power of 2), decompose A and B each
+ * into four submatrices A00, A01, A10, & A11 and B00, B01, B10, and B11 and perform
+ * these matrix multiplications in parallel:
+ *  A00 . B00
+ *  A01 . B10
+ *  A00 . B01
+ *  A01 . B11
+ *  A10 . B00
+ *  A11 . B10
+ *  A10 . B01
+ *  A11 . B11
+ * When the multiplications are done, perform the following four sums in parallel
+ *  A00 . B00 + A01 + B10
+ *  A00 . B01 + A01 . B11
+ *  A10 . B00 + A11 . B10
+ *  A10 . B01 + A11 . B11
+ */
 public class MultiplyMatrixTask implements  Runnable {
     private final Matrix _a;
     private final Matrix _b;
