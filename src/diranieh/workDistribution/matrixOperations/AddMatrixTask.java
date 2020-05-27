@@ -3,6 +3,15 @@ package diranieh.workDistribution.matrixOperations;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 
+/**
+ * Given matrices A and B (both n x n and n is a power of 2), decompose A and B each
+ * into four submatrices A00, A01, A10, and A11 and B00, B01, B10, and B11 and perform
+ * these matrix sums in parallel:
+ *  A00 + B00
+ *  A01 + B01
+ *  A10 + B10
+ *  A11 + B11
+ */
 public class AddMatrixTask implements  Runnable {
     private final Matrix _a;
     private final Matrix _b;
