@@ -5,7 +5,10 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-/* All matrices are assumed to be n x n */
+/**
+ * The MatrixTask class provides parallel methods to add and multiply matrices.
+ * All matrices are assumed to be n x n
+ *  */
 public class MatrixTask implements IMatrixTask {
     // Creates a thread pool that creates new threads as needed, but will reuse
     // previously constructed threads when they are available.
