@@ -1,7 +1,9 @@
 package diranieh.workDistribution.workStealing;
 
-/* Shows the basic implementation of a bounded thread-unsafe dequeue
-* Pushing item*/
+/** Shows the basic implementation of a bounded thread-unsafe dequeue
+ * The implementation in BoundedSequentalDequeue  is used as a starting point when
+ * implementing {@link BoundedConcurrentDequeue}
+ * */
 public class BoundedSequentialDequeue<E> {
     private final E[] _items;
 
