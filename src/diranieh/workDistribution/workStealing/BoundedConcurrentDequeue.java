@@ -1,13 +1,17 @@
 package diranieh.workDistribution.workStealing;
 
-/*
- Bounded concurrent dequeue. WorkStealingThread class maintains an array
- of these dequeues with a dequeue for each thread.
-
- This class is the concurrent version of the thread-unsafe
- BoundedSequentialDequeue class. Look at BoundedSequentialDequeue first
- before looking at this code.
- */
+/**
+ * Bounded concurrent dequeue. WorkStealingThread class maintains an array of these
+ * dequeues with a dequeue for each thread.
+ *
+ *  This class is the concurrent version of the thread-unsafe  @link BoundedSequentialDequeue}
+ *  class.
+ *
+ *  BoundedConcurrentDequeue class uses AtomicStampReference to store the index of the first
+ *  available task in the tasks array. Recall that an AtomicStampedReference maintains an
+ *  object reference (the index of the first task in the tasks queue), and an integer stamp
+ *  that acts as a counter that gets incremented each time the reference is changed
+ * */
 
 import java.util.concurrent.atomic.AtomicStampedReference;
 
