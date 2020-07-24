@@ -31,12 +31,13 @@ public class SimpleSemaphore implements Semaphore {
     @Override
     public void release() {
         synchronized (lock) {
+            // Check if semaphore was actually acquired
             if (slotsUsed == 0)
                 throw new IllegalMonitorStateException("semaphore was not acquired");
 
             --slotsUsed;
 
-            // Allow other threads since we have capacity
+            // One space available for any waiting thread
             lock.notifyAll();
         }
     }
