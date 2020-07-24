@@ -83,11 +83,11 @@ public class BoundedConcurrentDequeue {
         if (isEmpty())
             return null;
 
-        // Claim a task. If the claimed task was last in the queue, it is important that thieves
-        // notice that the dequeue is empty. This is why bottom was declared volatile; it ensures
-        // that thieves will read the most up-to-date value of bottom (recall that volatile fields
-        // always guarantee visibility (but not atomicity)
-        bottom--;   // recall: volatile
+        // Claim a task. If the claimed task was last in the queue, it is important that
+        // thieves  notice that the dequeue is empty. This is why bottom was declared
+        // volatile; it ensures that thieves will read the most up-to-date value of bottom
+        // (recall that volatile fields always guarantee visibility (but not atomicity)
+        bottom--;   // declared volatile
         Runnable task = tasks[bottom];
 
         // Test whether the current top field refer to a higher index. If so, the caller cannot
